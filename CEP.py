@@ -1,0 +1,1426 @@
+from random import randint
+import time
+
+gameTurn = "white"
+
+hor_rows = [[1, 2, 3, 4, 5, 6, 7, 8],
+    [9, 10, 11, 12, 13, 14, 15, 16],
+    [17, 18, 19, 20, 21, 22, 23, 24],
+    [25, 26, 27, 28, 29, 30, 31, 32],
+    [33, 34, 35, 36, 37, 38, 39, 40],
+    [41, 42, 43, 44, 45, 46, 47, 48],
+    [49, 50, 51, 52, 53, 54, 55, 56],
+    [57, 58, 59, 60, 61, 62, 63, 64]]
+
+#for pawn taking mechanics
+right_edge = [9, 17, 25, 33, 41, 49, 57]
+left_edge = [8, 16, 24, 32, 40, 48, 56, 64]
+#for knight and king logic without pac-manning.
+outer_left = [8, 16, 32, 40, 48, 56, 64]
+left = [7, 15, 23, 31, 39, 47, 55, 63]
+right = [2, 10, 18, 26, 34, 42, 50, 58]
+outer_right = [1, 9, 17, 25, 33, 41, 49, 57]
+outer2_bot = [1, 2, 3, 4, 5, 6, 7, 8]
+outer_bot = [9, 10, 11, 12, 13, 14, 15, 16]
+outer_top = [49, 50, 51, 52, 53, 54, 55, 56]
+outer2_top = [57, 58, 59, 60, 61, 62, 63, 64]
+
+class WhitePawn():
+    #store double move(bool), pos, name/id
+    def __init__(self, team, name, pos):
+        self.team = team
+        self.name = name
+        self.pos = pos
+        self.symbol = "♙"
+        
+        self.doublemove = True
+        self.moves = [] #"legal moves that can be made"
+
+    def moveGeneration(self):
+        if self.team == "white":
+
+            in_left = False
+            in_right = False
+            #for single move (since pawns can't take head on regardless)
+            holder1 = self.pos + 8
+            occupancy1 = False
+            for i in pieces:
+                if holder1 == i.pos:
+                    occupancy1 = True
+            if occupancy1 == False:
+                self.moves.append(self.pos + 8)
+            #for pawns taking one diag up left or right
+            for i in left_edge:
+                if i == self.pos:
+                    in_left = True
+            for i in right_edge:
+                if i == self.pos:
+                    in_right = True
+                    
+            #since only can either be in left_edge, right_edge, or neither
+            left_take = self.pos + 9
+            right_take = self.pos + 7
+            if in_left == True:
+                for i in pieces:
+                    if i.pos == right_take:
+                        self.moves.append(right_take) 
+            if in_right == True:
+                for i in pieces:
+                    if i.pos == left_take:
+                        self.moves.append(left_take)
+            if in_right == False and in_left == False:
+                for i in pieces:
+                    if i.pos == right_take:
+                        self.moves.append(right_take)
+                for i in pieces:
+                    if i.pos == left_take:
+                        self.moves.append(left_take) 
+
+            #for double move
+            if self.pos < 16:
+                self.doublemove = True
+            holder = self.pos + 16
+            occupancy = False
+            if self.doublemove == True:
+                for i in pieces:
+                    if holder == i.pos:
+                        occupancy = True
+                if occupancy == False and self.pos <= 16:
+                    self.moves.append(self.pos + 16)
+                    self.doublemove = False
+                    
+            #not sure why but had to through this check in their because moves kept generating 65
+            #aka the int set to a piece taken
+            for i in self.moves:
+                if i < 0 or i > 64:
+                    self.moves.remove(i)
+
+#essentially opposite math from white pawns
+class BlackPawn():
+    def __init__(self, team, name, pos):
+        self.team = team
+        self.name = name
+        self.pos = pos
+        self.symbol = "♟"
+        self.doublemove = True
+        self.moves = [] #"legal moves that can be made"
+
+    def moveGeneration(self):
+        if self.team == "black":
+            in_left = False
+            in_right = False
+            #for single move (since pawns can't take head on regardless)
+            holder1 = self.pos - 8
+            occupancy1 = False
+            for i in pieces:
+                if holder1 == i.pos:
+                    occupancy1 = True
+            if occupancy1 == False:
+                self.moves.append(self.pos - 8)
+            #for pawns taking one diag up left or right
+            for i in left_edge:
+                if i == self.pos:
+                    in_right = True
+            for i in right_edge:
+                if i == self.pos:
+                    in_left = True
+                    
+            #flipped left/right_take for the in left/right since inverted
+            left_take = self.pos - 9
+            right_take = self.pos - 7
+            if in_left == True:
+                for i in pieces:
+                    if i.pos == right_take:
+                        self.moves.append(right_take) 
+            if in_right == True:
+                for i in pieces:
+                    if i.pos == left_take:
+                        self.moves.append(left_take)
+
+            #for double move
+            if self.pos >= 49:
+                self.doublemove = True
+            holder = self.pos - 16
+            occupancy = False
+            if self.doublemove == True:
+                for i in pieces:
+                    if holder == i.pos:
+                        occupancy = True
+                if occupancy == False and self.pos >= 49:
+                    self.moves.append(self.pos - 16)
+                    
+            #not sure why but had to through this check in their because moves kept generating 65
+            #aka the int set to a piece taken
+            for i in self.moves:
+                if i < 0 or i > 64:
+                    self.moves.remove(i)
+
+class Rook():
+    def __init__(self, team, name, pos):
+        self.name = name
+        self.pos = pos
+        self.team = team
+        if self.team == "white":
+            self.symbol = "♖"
+        elif self.team == "black":
+            self.symbol = "♜"
+        self.moves = []
+        castleAccess = True #for king to castle to a chosen unmoved rook
+    
+    #adds moves while taking into consideration of current piece pos in "pieces"
+    def moveGeneration(self):
+        #indexing the location of piece to allow for movement generation stemming from position
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex1 = hor_rows.index(i)
+                    itemtex1 = i.index(item)
+                    #intex values
+                    reset_intex1 = intex1
+                    intex_up1 = 8 - intex1
+                    intex_down1 = intex1
+                    #itemtex values
+                    reset_itemtex1 = itemtex1
+                    itemtex_right1 = itemtex1
+                    itemtex_left1 = 8 - itemtex1
+
+        #vertical up
+        lopbol = True
+        count = 0
+        while count < intex_up1 and lopbol == True:
+            intex1 += 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #vertical down
+        lopbol = True
+        count = 0
+        intex1 = reset_intex1
+        while count < intex_down1 and lopbol == True:
+            intex1 -= 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #horizontal left
+        count = 0
+        lopbol = True
+        intex1 = reset_intex1
+        while count < itemtex_left1 and lopbol == True:
+            itemtex1 += 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #horizontal right
+        count = 0
+        lopbol = True
+        itemtex1 = reset_itemtex1
+        while count < itemtex_right1 and lopbol == True:
+            itemtex1 -= 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+class Knight():
+    def __init__(self, team, name, pos):
+        self.name = name
+        self.pos = pos
+        self.team = team
+        if self.team == "white":
+            self.symbol = "♘"
+        elif self.team == "black":
+            self.symbol = "♞"
+        self.moves = []
+
+    def moveGeneration(self):
+            #moves the knight can make
+        up_left = self.pos + 17
+        left_up = self.pos + 10
+        left_down = self.pos - 6
+        down_left = self.pos - 15
+
+        up_right = self.pos + 15
+        right_up = self.pos + 6
+        right_down = self.pos - 10
+        down_right = self.pos - 17
+
+        #adding values to moves before removing the illegal moves
+        self.moves.append(up_left)
+        self.moves.append(left_up)
+        self.moves.append(left_down)
+        self.moves.append(down_left)
+
+        self.moves.append(up_right)
+        self.moves.append(right_up)
+        self.moves.append(right_down)
+        self.moves.append(down_right)
+
+        #removing the illegal moves
+        if self.pos in outer_left:
+            try:
+                self.moves.remove(up_left)
+                self.moves.remove(left_up)
+                self.moves.remove(left_down)
+                self.moves.remove(down_left)
+            except:
+                pass
+
+        if self.pos in left:
+            try:
+                self.moves.remove(left_up)
+                self.moves.remove(left_down)
+            except:
+                pass    
+        
+        if self.pos in right:
+            try:
+                self.moves.remove(right.up)
+                self.moves.remove(right_down)
+            except:
+                pass
+
+        if self.pos in outer_right:
+            try:
+                self.moves.remove(up_right)
+                self.moves.remove(right_up)
+                self.moves.remove(right_down)
+                self.moves.remove(down_right)
+            except:
+                pass
+
+        if self.pos in outer2_bot:
+            try:
+                self.moves.remove(down_left)
+                self.moves.remove(down_right)
+                self.moves.remove(right_down)
+                self.moves.remove(left_down)
+            except:
+                pass
+
+        if self.pos in outer_bot:
+            try:
+                self.moves.remove(down_left)
+                self.moves.remove(down_right)
+            except:
+                pass
+
+        if self.pos in outer_top:
+            try:
+                self.moves.remove(up_left)
+                self.moves.remove(up_right)
+            except:
+                pass
+        
+        if self.pos in outer2_top:
+            try:
+                self.moves.remove(up_left)
+                self.moves.remove(up_right)
+                self.moves.remove(right_up)
+                self.moves.remove(left_up)
+            except:
+                pass
+
+        #iffy invalid move reduction. haha
+        for i in self.moves:
+            if i < 0:
+                self.moves.remove(i)
+            if i > 64:
+                self.moves.remove(i)
+            
+class Bishop():
+    def __init__(self, team, name, pos):
+        self.name = name
+        self.pos = pos
+        self.team = team
+        if self.team == "white":
+            self.symbol = "♗"
+        elif self.team == "black":
+            self.symbol = "♝"
+        self.moves = []
+
+    #locating pos/index in horizontal rows then adding int to find the next diagnoal pos relative to its start
+    def moveGeneration(self):
+        #capturing position to make moves relative
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex = hor_rows.index(i)
+                    itemtex = i.index(item)
+                    #intex values
+                    reset_intex = intex
+                    intex_down = intex
+                    intex_up = 7 - intex
+                    #itemtex values
+                    reset_itemtex = itemtex
+                    itemtex_right = itemtex
+                    intex_down2 = intex_down
+
+        #diagonal up-left
+        count = 0
+        lopbol = True
+        while count < intex_up and lopbol == True:
+            itemtex += 1
+            intex += 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down-right 
+        count = 0
+        lopbol = True
+        itemtex = reset_itemtex
+        intex  = reset_intex
+        while count < intex_down and lopbol == True:
+            itemtex -= 1
+            intex -= 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal up-right
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < itemtex_right and lopbol == True:
+            itemtex -= 1
+            intex += 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down left
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < intex_down2 and lopbol == True:
+            itemtex += 1
+            intex -= 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+#checking whether the current turns king is in check
+def kingCheck(self):
+    #no queen since redundant. Just gonna use bishop or rook AND for the checks
+    rookCheck = False
+    bishopCheck = False
+    knightCheck = False
+    pawnCheck = False
+
+    if self.team == "white":
+        for pot_check in self.rook_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "brook1" or piece.name == "brook2" or piece.name == "bquen":
+                        rookCheck = True
+
+        for pot_check in self.bishop_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "bbishop1" or piece.name == "bbishop2" or piece.name == "bquen":
+                        bishopCheck = True
+        
+        for pot_check in self.knight_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "bknight1" or piece.name == "bknight2":
+                        knightCheck = True
+
+        for pot_check in self.pawn_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "bpawn1" or piece.name == "bpawn2" or piece.name == "bpawn3" or piece.name == "bpawn4" or piece.name == "bpawn5" or piece.name == "bpawn6" or piece.name == "bpawn6" or piece.name == "bpawn7" or piece.name == "bpawn8":
+                        pawnCheck = True
+
+        if rookCheck or bishopCheck or knightCheck or pawnCheck:
+            return True
+        
+    if self.team == "black":
+        for pot_check in self.rook_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "wrook1" or piece.name == "wrook2" or piece.name == "wquen":
+                        rookCheck = True
+
+        for pot_check in self.bishop_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "wbishop1" or piece.name == "wbishop2" or piece.name == "wquen":
+                        bishopCheck = True
+        
+        for pot_check in self.knight_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "wknight1" or piece.name == "wknight2":
+                        knightCheck = True
+
+        for pot_check in self.pawn_check:
+            for piece in pieces:
+                if pot_check == piece.pos:
+                    if piece.name == "wpawn1" or piece.name == "wpawn2" or piece.name == "wpawn3" or piece.name == "wpawn4" or piece.name == "wpawn5" or piece.name == "wpawn6" or piece.name == "wpawn6" or piece.name == "wpawn7" or piece.name == "wpawn8":
+                        pawnCheck = True
+
+        if rookCheck or bishopCheck or knightCheck or pawnCheck:
+            return True
+
+class King():
+    #think of king as a queen but can only make a single move
+    def __init__(self, team, name, pos):
+        self.name = name
+        self.pos = pos
+        self.team = team
+        self.canCastle = True
+        if self.team == "white":
+            self.symbol = "♔"
+        elif self.team == "black":
+            self.symbol = "♚"
+        self.moves = []
+        self.rook_check = [] #list of all moves that could be made by would-be attackers
+        self.knight_check = []
+        self.bishop_check = [] #going to just define the moves seperately as to allow for better piece determination of if truly in check
+        self.pawn_check = []
+        
+    #check location relative to edges much like the knight logic
+
+    #going to reverse all legal moves from this pos to determine if there is an 
+    #adaquate piece that would therefore be rendering a check. Also to prevent 
+    #moving into check. Also checkmate.
+    def checkMoveGeneration(self):
+        self.rook_check = [] 
+        self.knight_check = []
+        self.bishop_check = [] 
+        self.pawn_check = []
+
+        if self.team == "white":
+            if self.pos + 9 == BlackPawn:
+                self.pawn_check.append(self.pos + 9)
+            if self.pos + 7 == BlackPawn:
+                self.pawn_check.append(self.pos + 7)
+
+        if self.team == "black":
+            if self.pos - 9 == WhitePawn:
+                self.pawn_check.append(self.pos - 9)
+            if self.pos - 7 == WhitePawn:
+                self.pawn_check.append(self.pos - 7)
+
+        #takes the current pos and determines if any threats.
+        #will also allow for checking valid positions incase they have check.
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex1 = hor_rows.index(i)
+                    itemtex1 = i.index(item)
+                    #intex values
+                    reset_intex1 = intex1
+                    intex_up1 = 8 - intex1
+                    intex_down1 = intex1
+                    #itemtex values
+                    reset_itemtex1 = itemtex1
+                    itemtex_right1 = itemtex1
+                    itemtex_left1 = 8 - itemtex1
+
+        #vertical up
+        lopbol = True
+        count = 0
+        while count < intex_up1 and lopbol == True:
+            intex1 += 1
+            try: 
+                self.rook_check.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.rook_check.remove(piece.pos)
+            count += 1
+
+        #vertical down
+        lopbol = True
+        count = 0
+        intex1 = reset_intex1
+        while count < intex_down1 and lopbol == True:
+            intex1 -= 1
+            try: 
+                self.rook_check.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.rook_check.remove(piece.pos)
+            count += 1
+
+        #horizontal left
+        count = 0
+        lopbol = True
+        intex1 = reset_intex1
+        while count < itemtex_left1 and lopbol == True:
+            itemtex1 += 1
+            try: 
+                self.rook_check.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.rook_check.remove(piece.pos)
+            count += 1
+
+        #horizontal right
+        count = 0
+        lopbol = True
+        itemtex1 = reset_itemtex1
+        while count < itemtex_right1 and lopbol == True:
+            itemtex1 -= 1
+            try: 
+                self.rook_check.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.rook_check.remove(piece.pos)
+            count += 1
+
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex = hor_rows.index(i)
+                    itemtex = i.index(item)
+                    #intex values
+                    reset_intex = intex
+                    intex_down = intex
+                    intex_up = 7 - intex
+                    #itemtex values
+                    reset_itemtex = itemtex
+                    itemtex_right = itemtex
+                    intex_down2 = intex_down
+
+        #diagonal up-left
+        count = 0
+        lopbol = True
+        while count < intex_up and lopbol == True:
+            itemtex += 1
+            intex += 1
+
+            try:
+                self.bishop_check.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down-right 
+        count = 0
+        lopbol = True
+        itemtex = reset_itemtex
+        intex  = reset_intex
+        while count < intex_down and lopbol == True:
+            itemtex -= 1
+            intex -= 1
+
+            try:
+                self.bishop_check.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal up-right
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < itemtex_right and lopbol == True:
+            itemtex -= 1
+            intex += 1
+
+            try:
+                self.bishop_check.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down left
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < intex_down2 and lopbol == True:
+            itemtex += 1
+            intex -= 1
+
+            try:
+                self.check.append(hor_rows[intex][itemtex])
+            except:
+                break
+
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+    #knight checks
+        up_left = self.pos + 17
+        left_up = self.pos + 10
+        left_down = self.pos - 6
+        down_left = self.pos - 15
+
+        up_right = self.pos + 15
+        right_up = self.pos + 6
+        right_down = self.pos - 10
+        down_right = self.pos - 17
+
+        #adding values to moves before removing the illegal moves
+        self.knight_check.append(up_left)
+        self.knight_check.append(left_up)
+        self.knight_check.append(left_down)
+        self.knight_check.append(down_left)
+
+        self.knight_check.append(up_right)
+        self.knight_check.append(right_up)
+        self.knight_check.append(right_down)
+        self.knight_check.append(down_right)
+
+        #removing the illegal moves
+        if self.pos in outer_left:
+            try:
+                self.knight_check.remove(up_left)
+                self.knight_check.remove(left_up)
+                self.knight_check.remove(left_down)
+                self.knight_check.remove(down_left)
+            except:
+                pass
+
+        if self.pos in left:
+            try:
+                self.knight_check.remove(left_up)
+                self.knight_check.remove(left_down)
+            except:
+                pass    
+        
+        if self.pos in right:
+            try:
+                self.knight_check.remove(right.up)
+                self.knight_check.remove(right_down)
+            except:
+                pass
+
+        if self.pos in outer_right:
+            try:
+                self.knight_check.remove(up_right)
+                self.knight_check.remove(right_up)
+                self.knight_check.remove(right_down)
+                self.knight_check.remove(down_right)
+            except:
+                pass
+
+        if self.pos in outer2_bot:
+            try:
+                self.knight_check.remove(down_left)
+                self.knight_check.remove(down_right)
+                self.knight_check.remove(right_down)
+                self.knight_check.remove(left_down)
+            except:
+                pass
+
+        if self.pos in outer_bot:
+            try:
+                self.knight_check.remove(down_left)
+                self.knight_check.remove(down_right)
+            except:
+                pass
+
+        if self.pos in outer_top:
+            try:
+                self.knight_check.remove(up_left)
+                self.knight_check.remove(up_right)
+            except:
+                pass
+        
+        if self.pos in outer2_top:
+            try:
+                self.knight_check.remove(up_left)
+                self.knight_check.remove(up_right)
+                self.knight_check.remove(right_up)
+                self.knight_check.remove(left_up)
+            except:
+                pass
+
+        #iffy invalid move reduction. haha
+        for i in self.knight_check:
+            if i < 0:
+                self.knight_check.remove(i)
+            if i > 64:
+                self.knight_check.remove(i)   
+
+    def clearCheckMoves(self):
+        #again no queen since queen is redundantly using rook and bishop moves.
+        #instead including it in checking the piece name for kingCheck
+        self.rook_check = []
+        self.knight_check = []
+        self.bishop_check = []
+        self.pawn_check = []                     
+
+    def moveGeneration(self):
+        #indexing the location of piece to allow for movement generation stemming from position
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex1 = hor_rows.index(i)
+                    itemtex1 = i.index(item)
+                    #intex values
+                    reset_intex1 = intex1
+                    intex_up1 = (intex1 - intex1) + 1
+                    intex_down1 = intex1
+                    #itemtex values
+                    reset_itemtex1 = itemtex1
+                    itemtex_right1 = (itemtex1 - itemtex1) + 1
+                    itemtex_left1 = (itemtex1 - itemtex1) + 1
+
+        #vertical up
+        lopbol = True
+        count = 0
+        while count < intex_up1 and lopbol == True:
+            intex1 += 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #vertical down
+        lopbol = True
+        count = 0
+        intex1 = reset_intex1
+        #if loop to check edgecase
+        while count < intex_down1 and lopbol == True:
+            intex1 -= 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+                break
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #horizontal left
+        count = 0
+        lopbol = True
+        intex1 = reset_intex1
+        while count < itemtex_left1 and lopbol == True:
+            itemtex1 += 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #horizontal right
+        count = 0
+        lopbol = True
+        itemtex1 = reset_itemtex1
+        while count < itemtex_right1 and lopbol == True:
+            itemtex1 -= 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex = hor_rows.index(i)
+                    itemtex = i.index(item)
+                    #intex values
+                    reset_intex = intex
+                    intex_down = intex
+                    intex_up = 7 - intex
+                    #itemtex values
+                    reset_itemtex = itemtex
+                    itemtex_right = itemtex
+                    intex_down2 = intex_down
+
+        #diagonal up-left
+        count = 0
+        lopbol = True
+        while count < intex_up and lopbol == True:
+            itemtex += 1
+            intex += 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+                break
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down-right 
+        count = 0
+        lopbol = True
+        itemtex = reset_itemtex
+        intex  = reset_intex
+        while count < intex_down and lopbol == True:
+            itemtex -= 1
+            intex -= 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+                break
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal up-right
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < itemtex_right and lopbol == True:
+            itemtex -= 1
+            intex += 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+                break
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down left
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < intex_down2 and lopbol == True:
+            itemtex += 1
+            intex -= 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+                break
+            except:
+                break
+
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #Need to check a returned value, issue is with that.
+        for i in self.moves:
+            for piece in pieces:
+                if i == piece.pos:
+                    if self.team == piece.team:
+                        self.moves.remove(i)
+
+class Queen():
+    def __init__(self, team, name, pos):
+        self.name = name
+        self.pos = pos
+        self.team = team
+        if self.team == "white":
+            self.symbol = "♕"
+        elif self.team == "black":
+            self.symbol = "♛"
+        self.moves = []
+
+    #function that keep tracks of what row and col piece is on to allow for easier move search in regards to rows and cols
+    def moveGeneration(self):
+        #indexing the location of piece to allow for movement generation stemming from position
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex1 = hor_rows.index(i)
+                    itemtex1 = i.index(item)
+                    #intex values
+                    reset_intex1 = intex1
+                    intex_up1 = 8 - intex1
+                    intex_down1 = intex1
+                    #itemtex values
+                    reset_itemtex1 = itemtex1
+                    itemtex_right1 = itemtex1
+                    itemtex_left1 = 8 - itemtex1
+
+        #vertical up
+        lopbol = True
+        count = 0
+        while count < intex_up1 and lopbol == True:
+            intex1 += 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #vertical down
+        lopbol = True
+        count = 0
+        intex1 = reset_intex1
+        while count < intex_down1 and lopbol == True:
+            intex1 -= 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #horizontal left
+        count = 0
+        lopbol = True
+        intex1 = reset_intex1
+        while count < itemtex_left1 and lopbol == True:
+            itemtex1 += 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #horizontal right
+        count = 0
+        lopbol = True
+        itemtex1 = reset_itemtex1
+        while count < itemtex_right1 and lopbol == True:
+            itemtex1 -= 1
+            try: 
+                self.moves.append(hor_rows[intex1][itemtex1])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex1][itemtex1] == i.pos:
+                    lopbol = False
+            count += 1
+
+        for i in hor_rows:
+            for item in i:
+                if item == self.pos:
+                    intex = hor_rows.index(i)
+                    itemtex = i.index(item)
+                    #intex values
+                    reset_intex = intex
+                    intex_down = intex
+                    intex_up = 7 - intex
+                    #itemtex values
+                    reset_itemtex = itemtex
+                    itemtex_right = itemtex
+                    intex_down2 = intex_down
+
+        #diagonal up-left
+        count = 0
+        lopbol = True
+        while count < intex_up and lopbol == True:
+            itemtex += 1
+            intex += 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down-right 
+        count = 0
+        lopbol = True
+        itemtex = reset_itemtex
+        intex  = reset_intex
+        while count < intex_down and lopbol == True:
+            itemtex -= 1
+            intex -= 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal up-right
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < itemtex_right and lopbol == True:
+            itemtex -= 1
+            intex += 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+        #diagonal down left
+        count = 0
+        lopbol = True
+        intex = reset_intex
+        itemtex = reset_itemtex
+        while count < intex_down2 and lopbol == True:
+            itemtex += 1
+            intex -= 1
+
+            try:
+                self.moves.append(hor_rows[intex][itemtex])
+            except:
+                break
+
+            for i in pieces:
+                if hor_rows[intex][itemtex] == i.pos:
+                    lopbol = False
+            count += 1
+
+pieces = []
+#starting pos of all pieces
+#white krook
+wrook1 = Rook("white", "wrook1", 1)
+pieces.append(wrook1)
+wrook2 = Rook("white", "wrook2", 8)
+pieces.append(wrook2)
+
+brook1 = Rook("black", "brook1", 64)
+pieces.append(brook1)
+brook2 = Rook("black", "brook2", 57)
+pieces.append(brook2)
+
+#whiteknight
+wknight1 = Knight("white", "wnight1", 2)
+pieces.append(wknight1)
+wknight2 = Knight("white", "wnight2", 7)
+pieces.append(wknight2)
+
+bknight1 = Knight("black", "brook1", 63)
+pieces.append(bknight1)
+bknight2 = Knight("black", "brook2", 58)
+pieces.append(bknight2)
+
+wbishop1 = Bishop("white", "wbishop1", 3)
+pieces.append(wbishop1)
+wbishop2 = Bishop("white", "wbisop2", 6)
+pieces.append(wbishop2)
+
+bbishop1 = Bishop("black", "bbishop1", 62)
+pieces.append(bbishop1)
+bbishop2 = Bishop("black", "bbishop2", 59)
+pieces.append(bbishop2)
+
+wking = King("white", "wking", 5)
+pieces.append(wking)
+bking = King("black", "bking", 61)
+pieces.append(bking)
+
+wquen = Queen("white", "wquen1", 4)
+pieces.append(wquen)
+bquen = Queen("black", "bquen1", 60)
+pieces.append(bquen)
+
+wpawn1 = WhitePawn("white", "wpawn1", 9)
+wpawn2 = WhitePawn("white", "wpawn2", 10)
+wpawn3 = WhitePawn("white", "wpawn3", 11)
+wpawn4 = WhitePawn("white", "wpawn4", 12)
+wpawn5 = WhitePawn("white", "wpawn5", 13)
+wpawn6 = WhitePawn("white", "wpawn6", 14)
+wpawn7 = WhitePawn("white", "wpawn7", 15)
+wpawn8 = WhitePawn("white", "wpawn8", 16)
+pieces.append(wpawn1)
+pieces.append(wpawn2)
+pieces.append(wpawn3)
+pieces.append(wpawn4)
+pieces.append(wpawn5)
+pieces.append(wpawn6)
+pieces.append(wpawn7)
+pieces.append(wpawn8)
+
+bpawn1 = BlackPawn("black", "bpawn1", 56)
+bpawn2 = BlackPawn("black", "bpawn2", 55)
+bpawn3 = BlackPawn("black", "bpawn3", 54)
+bpawn4 = BlackPawn("black", "bpawn4", 53)
+bpawn5 = BlackPawn("black", "bpawn5", 52)
+bpawn6 = BlackPawn("black", "bpawn6", 51)
+bpawn7 = BlackPawn("black", "bpawn7", 50)
+bpawn8 = BlackPawn("black", "bpawn8", 49)
+pieces.append(bpawn1)
+pieces.append(bpawn2)
+pieces.append(bpawn3)
+pieces.append(bpawn4)
+pieces.append(bpawn5)
+pieces.append(bpawn6)
+pieces.append(bpawn7)
+pieces.append(bpawn8)
+
+    #functions outside of the object
+    #might make a seperate file for them but also maybe not
+#checking for residence
+def checkSquare(piece_to_move, value=int):
+    occupied = False
+    for item in pieces:
+        if int(item) == int(piece_to_move.pos):
+         continue
+        if int(item) == int(value):
+            occupied = True
+    if occupied == True:
+        return True
+    else:
+        return False
+    
+def makeMove(self, pos=int):
+    canExecute = False
+    if pos in self.moves:
+        canExecute = True
+    else:
+        canExecute = False
+
+    posTaken = False
+    if canExecute == True:
+        for i in pieces:
+            if i.pos == pos:
+                if i.team != self.team:
+                    piece = i
+                    posTaken = True
+                    break
+                elif i.team == self.team:
+                    canExecute = False
+                else:
+                    posTaken = False
+
+    if canExecute == True and posTaken == True:
+        self.pos = piece.pos
+        piece.pos = 65
+
+    if canExecute == True and posTaken == False:
+        self.pos = pos    
+    
+def clearMoves(self):
+    self.moves = []
+
+#for testing purposes
+#converting board into cli
+
+def printBoard():
+    board = [1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 ,
+        9 , 10, 11, 12, 13, 14, 15, 16, 
+        17, 18, 19, 20, 21, 22, 23, 24, 
+        25, 26, 27, 28, 29, 30, 31, 32, 
+        33, 34, 35, 36, 37, 38, 39, 40, 
+        41, 42, 43, 44, 45, 46, 47, 48, 
+        49, 50, 51, 52, 53, 54, 55, 56, 
+        57, 58, 59, 60, 61, 62, 63, 64]
+    board_reset = board.copy()
+
+    for piece in pieces:
+        for i in board:
+            if i == piece.pos:
+                itemtex = board.index(i)
+                board.remove(i)
+                board.insert(itemtex, piece.symbol)
+
+    print(board[0:8])
+    print(board[8:16])
+    print(board[16:24])
+    print(board[24:32])
+    print(board[32:40])
+    print(board[40:48])
+    print(board[48:56])
+    print(board[56:64])
+    print("\n")
+
+    board = board_reset
+
+def legalFilter(): #for which teams turn it is
+    global gameTurn
+    #generates only legal moves of white
+    if gameTurn == "white":
+        for piece in pieces:
+            if piece.team == "white":
+                try:
+                    pos_reset = piece.pos
+                    piece.moveGeneration()
+                    for i in piece.moves:
+                        makeMove(piece, i)
+                        if gameTurn == "white":
+                            if kingCheck(wking):
+                                print("white king was in check")
+                                piece.moves.remove(i)
+                    clearMoves(piece)
+                    piece.pos = pos_reset
+                except:
+                    print("Error with legal filter")
+    if gameTurn == "black":
+        for piece in pieces:
+            if piece.team == "black":
+                try:
+                    pos_reset = piece.pos
+                    piece.moveGeneration()
+                    for i in piece.moves:
+                        makeMove(piece, i)
+                        if kingCheck(bking):
+                            print("Black king was in check")
+                            piece.moves.remove(i)
+                    clearMoves(piece)
+                    piece.pos = pos_reset
+                except:
+                    print("Error with legal filter")
+
+def gameLoop():
+    global gameTurn
+    active = True
+    while active:
+        printBoard()
+        
+        legalFilter() #filers for legal moves
+
+        piece_name = []
+        if gameTurn == "white":
+            for i in pieces:
+                if i.team == "white":
+                    piece_name.append(i.name)
+        else:
+            for i in pieces:
+                if i.team == "black":
+                    piece_name.append(i.name)
+        print(piece_name)
+        piece_select = input("Which piece would you like to move?:\n")
+        try:
+            for i in pieces:
+                if i.name == piece_select:
+                    piece_select = i
+                    break
+        except:
+            print("Error with checking pieces list.")
+
+        try:
+            piece_select.moveGeneration()
+            print(f"Available moves of {piece_select.name}:")
+            print(piece_select.moves)
+            time.sleep(1)
+            move_select = input("Where would you like to move it?:\n")
+        except:
+            print("Error with the selected pieces move generation.")
+        try:
+            makeMove(piece_select, int(move_select))
+        except:
+            print("Error with making the move.")
+        try:
+            clearMoves(piece_select)
+        except:
+            print("couldn't clear moves (probably has none to clear)")
+        
+        try:
+            if kingCheck(wking):
+                print("white king is in check!!!")
+        except:
+            print("error with checking for kings check")
+        
+        if gameTurn == "white":
+            gameTurn = "black"
+        else:
+            gameTurn == "white"
+    time.sleep(1)
+gameLoop() 
