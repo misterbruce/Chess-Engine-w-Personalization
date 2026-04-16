@@ -2,6 +2,12 @@ from random import randint
 import time
 
 gameTurn = "white"
+def gameTurnComplete():
+    global gameTurn
+    if gameTurn == "white":
+        gameTurn = "black"
+    elif gameTurn == "black":
+        gameTurn = "white"
 
 hor_rows = [[1, 2, 3, 4, 5, 6, 7, 8],
     [9, 10, 11, 12, 13, 14, 15, 16],
@@ -584,7 +590,8 @@ class King():
                     for piece in pieces:
                         if piece.pos == check_pos:
                             if piece.team == self.team:
-                                self.rook_check.remove(piece.pos)
+                                self.rook_check.remove(check_pos)
+
             count += 1
 
         #vertical down
@@ -600,11 +607,6 @@ class King():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
-                    check_pos = hor_rows[intex1][itemtex1]
-                    for piece in pieces:
-                        if piece.pos == check_pos:
-                            if piece.team == self.team:
-                                self.rook_check.remove(piece.pos)
             count += 1
 
         #horizontal left
@@ -620,11 +622,6 @@ class King():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
-                    check_pos = hor_rows[intex1][itemtex1]
-                    for piece in pieces:
-                        if piece.pos == check_pos:
-                            if piece.team == self.team:
-                                self.rook_check.remove(piece.pos)
             count += 1
 
         #horizontal right
@@ -640,11 +637,6 @@ class King():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
-                    check_pos = hor_rows[intex1][itemtex1]
-                    for piece in pieces:
-                        if piece.pos == check_pos:
-                            if piece.team == self.team:
-                                self.rook_check.remove(piece.pos)
             count += 1
 
         for i in hor_rows:
@@ -1180,80 +1172,80 @@ class Queen():
 pieces = []
 #starting pos of all pieces
 #white krook
-wrook1 = Rook("white", "wrook1", 1)
+wrook1 = Rook("white", "wrook1", 15)
 pieces.append(wrook1)
-wrook2 = Rook("white", "wrook2", 8)
-pieces.append(wrook2)
+# wrook2 = Rook("white", "wrook2", 8)
+# pieces.append(wrook2)
 
 brook1 = Rook("black", "brook1", 64)
 pieces.append(brook1)
-brook2 = Rook("black", "brook2", 57)
-pieces.append(brook2)
+# brook2 = Rook("black", "brook2", 57)
+# pieces.append(brook2)
 
 #whiteknight
-wknight1 = Knight("white", "wnight1", 2)
-pieces.append(wknight1)
-wknight2 = Knight("white", "wnight2", 7)
-pieces.append(wknight2)
+# wknight1 = Knight("white", "wnight1", 2)
+# pieces.append(wknight1)
+# wknight2 = Knight("white", "wnight2", 7)
+# pieces.append(wknight2)
 
-bknight1 = Knight("black", "brook1", 63)
-pieces.append(bknight1)
-bknight2 = Knight("black", "brook2", 58)
-pieces.append(bknight2)
+# bknight1 = Knight("black", "brook1", 63)
+# pieces.append(bknight1)
+# bknight2 = Knight("black", "brook2", 58)
+# pieces.append(bknight2)
 
-wbishop1 = Bishop("white", "wbishop1", 3)
-pieces.append(wbishop1)
-wbishop2 = Bishop("white", "wbisop2", 6)
-pieces.append(wbishop2)
+# wbishop1 = Bishop("white", "wbishop1", 3)
+# pieces.append(wbishop1)
+# wbishop2 = Bishop("white", "wbisop2", 6)
+# pieces.append(wbishop2)
 
-bbishop1 = Bishop("black", "bbishop1", 62)
-pieces.append(bbishop1)
-bbishop2 = Bishop("black", "bbishop2", 59)
-pieces.append(bbishop2)
+# bbishop1 = Bishop("black", "bbishop1", 62)
+# pieces.append(bbishop1)
+# bbishop2 = Bishop("black", "bbishop2", 59)
+# pieces.append(bbishop2)
 
 wking = King("white", "wking", 5)
 pieces.append(wking)
 bking = King("black", "bking", 61)
 pieces.append(bking)
 
-wquen = Queen("white", "wquen1", 4)
-pieces.append(wquen)
-bquen = Queen("black", "bquen1", 60)
-pieces.append(bquen)
+# wquen = Queen("white", "wquen1", 4)
+# pieces.append(wquen)
+# bquen = Queen("black", "bquen1", 60)
+# pieces.append(bquen)
 
-wpawn1 = WhitePawn("white", "wpawn1", 9)
-wpawn2 = WhitePawn("white", "wpawn2", 10)
-wpawn3 = WhitePawn("white", "wpawn3", 11)
-wpawn4 = WhitePawn("white", "wpawn4", 12)
-wpawn5 = WhitePawn("white", "wpawn5", 13)
+# wpawn1 = WhitePawn("white", "wpawn1", 9)
+# wpawn2 = WhitePawn("white", "wpawn2", 10)
+# wpawn3 = WhitePawn("white", "wpawn3", 11)
+# wpawn4 = WhitePawn("white", "wpawn4", 12)
+# wpawn5 = WhitePawn("white", "wpawn5", 13)
 wpawn6 = WhitePawn("white", "wpawn6", 14)
-wpawn7 = WhitePawn("white", "wpawn7", 15)
-wpawn8 = WhitePawn("white", "wpawn8", 16)
-pieces.append(wpawn1)
-pieces.append(wpawn2)
-pieces.append(wpawn3)
-pieces.append(wpawn4)
-pieces.append(wpawn5)
+# wpawn7 = WhitePawn("white", "wpawn7", 15)
+# wpawn8 = WhitePawn("white", "wpawn8", 16)
+# pieces.append(wpawn1)
+# pieces.append(wpawn2)
+# pieces.append(wpawn3)
+# pieces.append(wpawn4)
+# pieces.append(wpawn5)
 pieces.append(wpawn6)
-pieces.append(wpawn7)
-pieces.append(wpawn8)
+# pieces.append(wpawn7)
+# pieces.append(wpawn8)
 
-bpawn1 = BlackPawn("black", "bpawn1", 56)
-bpawn2 = BlackPawn("black", "bpawn2", 55)
-bpawn3 = BlackPawn("black", "bpawn3", 54)
-bpawn4 = BlackPawn("black", "bpawn4", 53)
-bpawn5 = BlackPawn("black", "bpawn5", 52)
-bpawn6 = BlackPawn("black", "bpawn6", 51)
-bpawn7 = BlackPawn("black", "bpawn7", 50)
-bpawn8 = BlackPawn("black", "bpawn8", 49)
-pieces.append(bpawn1)
-pieces.append(bpawn2)
-pieces.append(bpawn3)
-pieces.append(bpawn4)
-pieces.append(bpawn5)
-pieces.append(bpawn6)
-pieces.append(bpawn7)
-pieces.append(bpawn8)
+# bpawn1 = BlackPawn("black", "bpawn1", 56)
+# bpawn2 = BlackPawn("black", "bpawn2", 55)
+# bpawn3 = BlackPawn("black", "bpawn3", 54)
+# bpawn4 = BlackPawn("black", "bpawn4", 53)
+# bpawn5 = BlackPawn("black", "bpawn5", 52)
+# bpawn6 = BlackPawn("black", "bpawn6", 51)
+# bpawn7 = BlackPawn("black", "bpawn7", 50)
+# bpawn8 = BlackPawn("black", "bpawn8", 49)
+# pieces.append(bpawn1)
+# pieces.append(bpawn2)
+# pieces.append(bpawn3)
+# pieces.append(bpawn4)
+# pieces.append(bpawn5)
+# pieces.append(bpawn6)
+# pieces.append(bpawn7)
+# pieces.append(bpawn8)
 
     #functions outside of the object
     #might make a seperate file for them but also maybe not
@@ -1333,94 +1325,93 @@ def printBoard():
 
     board = board_reset
 
-def legalFilter(): #for which teams turn it is
-    global gameTurn
-    #generates only legal moves of white
-    if gameTurn == "white":
-        for piece in pieces:
-            if piece.team == "white":
-                try:
-                    pos_reset = piece.pos
-                    piece.moveGeneration()
-                    for i in piece.moves:
-                        makeMove(piece, i)
-                        if gameTurn == "white":
-                            if kingCheck(wking):
-                                print("white king was in check")
-                                piece.moves.remove(i)
-                    clearMoves(piece)
-                    piece.pos = pos_reset
-                except:
-                    print("Error with legal filter")
-    if gameTurn == "black":
-        for piece in pieces:
-            if piece.team == "black":
-                try:
-                    pos_reset = piece.pos
-                    piece.moveGeneration()
-                    for i in piece.moves:
-                        makeMove(piece, i)
-                        if kingCheck(bking):
-                            print("Black king was in check")
-                            piece.moves.remove(i)
-                    clearMoves(piece)
-                    piece.pos = pos_reset
-                except:
-                    print("Error with legal filter")
+def clearAllMoves():
+    for piece in pieces:
+        piece.moves = []
 
-def gameLoop():
+#For own team making compromising moves. 
+#This does not include enemy causing a check on their turn.
+#Also generates all specified piece moves.
+def legalMoves():
+    for piece in pieces:
+        if piece.team == "white":
+            reset = piece.pos
+            piece.moveGeneration()
+            for move in reversed(piece.moves): #reversed list mostly for keeping pawn's double move available
+                makeMove(piece, move)
+                wking.checkMoveGeneration()
+                if kingCheck(wking):
+                    print(f"King Check! From move {move}!")
+                    time.sleep(.5)
+                    piece.moves.remove(move)
+                wking.clearCheckMoves()
+            piece.pos = reset
+
+    for piece in pieces:
+        if piece.team == "black":
+            reset = piece.pos
+            piece.moveGeneration()
+            for move in reversed(piece.moves):
+                makeMove(piece, move)
+                bking.checkMoveGeneration()
+                if kingCheck(bking):
+                    print(f"King Check! From move {move}!")
+                    time.sleep(.5)
+                    piece.moves.remove(move)
+                bking.clearCheckMoves()
+            piece.pos = reset
+            
+
+def gameTesting():
     global gameTurn
+    pnames = []
     active = True
     while active:
+        time.sleep(1.5)
         printBoard()
-        
-        legalFilter() #filers for legal moves
-
-        piece_name = []
         if gameTurn == "white":
-            for i in pieces:
-                if i.team == "white":
-                    piece_name.append(i.name)
-        else:
-            for i in pieces:
-                if i.team == "black":
-                    piece_name.append(i.name)
-        print(piece_name)
-        piece_select = input("Which piece would you like to move?:\n")
-        try:
-            for i in pieces:
-                if i.name == piece_select:
-                    piece_select = i
-                    break
-        except:
-            print("Error with checking pieces list.")
+            for piece in pieces:
+                if piece.team == "white":
+                    pnames.append(piece.name)
+        if gameTurn == "black":
+            for piece in pieces:
+                if piece.team == "black":
+                    pnames.append(piece.name)
+        print(pnames)
+        pnames = []
 
-        try:
-            piece_select.moveGeneration()
-            print(f"Available moves of {piece_select.name}:")
-            print(piece_select.moves)
-            time.sleep(1)
-            move_select = input("Where would you like to move it?:\n")
-        except:
-            print("Error with the selected pieces move generation.")
-        try:
-            makeMove(piece_select, int(move_select))
-        except:
-            print("Error with making the move.")
-        try:
-            clearMoves(piece_select)
-        except:
-            print("couldn't clear moves (probably has none to clear)")
+        legalMoves()
+
+        name_loop = True
+        while name_loop:
+            piece_selection = input("Which piece would you like to move?\n") 
+            for piece in pieces:
+                if piece.name == piece_selection:
+                    if piece.team == gameTurn and piece.moves != []:
+                        piece_call = piece
+                        name_loop = False
+                    elif not piece.moves:
+                        print("There are no legal moves for this piece.")
         
+        print(f"Available moves of {piece_selection} are: \n{piece_call.moves}")
+
+        move_loop = True
+        while move_loop and name_loop == False:
+            piece_move = input("Where should it move?\n")
+            for move in piece_call.moves:
+                try:
+                    if int(piece_move) == move:
+                        move_loop = False
+                except:
+                    print("There was an error with checking the entered piece move.")
         try:
-            if kingCheck(wking):
-                print("white king is in check!!!")
+            makeMove(piece_call, int(piece_move))
+            clearMoves(piece_call)
         except:
-            print("error with checking for kings check")
-        
-        if gameTurn == "white":
-            gameTurn = "black"
-        else:
-            gameTurn == "white"
-    time.sleep(1)
-gameLoop() 
+            print("There was an error making the move.")
+
+        clearAllMoves()
+
+        gameTurnComplete()
+
+gameTesting()
