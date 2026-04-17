@@ -18,10 +18,10 @@ hor_rows = [[1, 2, 3, 4, 5, 6, 7, 8],
     [49, 50, 51, 52, 53, 54, 55, 56],
     [57, 58, 59, 60, 61, 62, 63, 64]]
 
-#for pawn taking mechanics
+#For pawn taking logic.
 right_edge = [9, 17, 25, 33, 41, 49, 57]
 left_edge = [8, 16, 24, 32, 40, 48, 56, 64]
-#for knight and king logic without pac-manning.
+#For knight and king logic to prevent "pac-manning".
 outer_left = [8, 16, 32, 40, 48, 56, 64]
 left = [7, 15, 23, 31, 39, 47, 55, 63]
 right = [2, 10, 18, 26, 34, 42, 50, 58]
@@ -32,7 +32,6 @@ outer_top = [49, 50, 51, 52, 53, 54, 55, 56]
 outer2_top = [57, 58, 59, 60, 61, 62, 63, 64]
 
 class WhitePawn():
-    #store double move(bool), pos, name/id
     def __init__(self, team, name, pos):
         self.team = team
         self.name = name
@@ -40,14 +39,14 @@ class WhitePawn():
         self.symbol = "♙"
         
         self.doublemove = True
-        self.moves = [] #"legal moves that can be made"
+        self.moves = [] #Psuedo-legal moves that can be made.
 
     def moveGeneration(self):
         if self.team == "white":
 
             in_left = False
             in_right = False
-            #for single move (since pawns can't take head on regardless)
+            #For single move (since pawns can't take head on regardless).
             holder1 = self.pos + 8
             occupancy1 = False
             for i in pieces:
@@ -55,7 +54,7 @@ class WhitePawn():
                     occupancy1 = True
             if occupancy1 == False:
                 self.moves.append(self.pos + 8)
-            #for pawns taking one diag up left or right
+            #For pawn taking logic.
             for i in left_edge:
                 if i == self.pos:
                     in_left = True
@@ -63,7 +62,7 @@ class WhitePawn():
                 if i == self.pos:
                     in_right = True
                     
-            #since only can either be in left_edge, right_edge, or neither
+            #Since pawns only can either be in left_edge, right_edge, or neither.
             left_take = self.pos + 9
             right_take = self.pos + 7
             if in_left == True:
@@ -82,7 +81,7 @@ class WhitePawn():
                     if i.pos == left_take:
                         self.moves.append(left_take) 
 
-            #for double move
+            #For pawn double move.
             if self.pos < 16:
                 self.doublemove = True
             holder = self.pos + 16
@@ -95,13 +94,13 @@ class WhitePawn():
                     self.moves.append(self.pos + 16)
                     self.doublemove = False
                     
-            #not sure why but had to through this check in their because moves kept generating 65
-            #aka the int set to a piece taken
+            #Not sure why but had to throw this check in their because moves kept generating 65
+            #aka the int set to a piece taken.
             for i in self.moves:
                 if i < 0 or i > 64:
                     self.moves.remove(i)
 
-#essentially opposite math from white pawns
+#Opposite math from white pawns.
 class BlackPawn():
     def __init__(self, team, name, pos):
         self.team = team
@@ -109,13 +108,12 @@ class BlackPawn():
         self.pos = pos
         self.symbol = "♟"
         self.doublemove = True
-        self.moves = [] #"legal moves that can be made"
+        self.moves = []
 
     def moveGeneration(self):
         if self.team == "black":
             in_left = False
             in_right = False
-            #for single move (since pawns can't take head on regardless)
             holder1 = self.pos - 8
             occupancy1 = False
             for i in pieces:
@@ -123,7 +121,7 @@ class BlackPawn():
                     occupancy1 = True
             if occupancy1 == False:
                 self.moves.append(self.pos - 8)
-            #for pawns taking one diag up left or right
+
             for i in left_edge:
                 if i == self.pos:
                     in_right = True
@@ -131,7 +129,6 @@ class BlackPawn():
                 if i == self.pos:
                     in_left = True
                     
-            #flipped left/right_take for the in left/right since inverted
             left_take = self.pos - 9
             right_take = self.pos - 7
             if in_left == True:
@@ -143,7 +140,6 @@ class BlackPawn():
                     if i.pos == left_take:
                         self.moves.append(left_take)
 
-            #for double move
             if self.pos >= 49:
                 self.doublemove = True
             holder = self.pos - 16
@@ -155,8 +151,6 @@ class BlackPawn():
                 if occupancy == False and self.pos >= 49:
                     self.moves.append(self.pos - 16)
                     
-            #not sure why but had to through this check in their because moves kept generating 65
-            #aka the int set to a piece taken
             for i in self.moves:
                 if i < 0 or i > 64:
                     self.moves.remove(i)
@@ -171,11 +165,11 @@ class Rook():
         elif self.team == "black":
             self.symbol = "♜"
         self.moves = []
-        castleAccess = True #for king to castle to a chosen unmoved rook
+        castleAccess = True #For king to castle to a chosen unmoved rook.
     
-    #adds moves while taking into consideration of current piece pos in "pieces"
+    #Adds moves while taking into consideration of current piece pos in "pieces".
     def moveGeneration(self):
-        #indexing the location of piece to allow for movement generation stemming from position
+        #Indexing the location of piece to allow for movement generation stemming from position on hor_rows 2D array.
         for i in hor_rows:
             for item in i:
                 if item == self.pos:
@@ -190,7 +184,7 @@ class Rook():
                     itemtex_right1 = itemtex1
                     itemtex_left1 = 8 - itemtex1
 
-        #vertical up
+        #Vertical Up
         lopbol = True
         count = 0
         while count < intex_up1 and lopbol == True:
@@ -202,9 +196,14 @@ class Rook():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
-        #vertical down
+        #Vertical Down
         lopbol = True
         count = 0
         intex1 = reset_intex1
@@ -217,9 +216,14 @@ class Rook():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
-        #horizontal left
+        #Horizontal Left
         count = 0
         lopbol = True
         intex1 = reset_intex1
@@ -232,9 +236,14 @@ class Rook():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
-        #horizontal right
+        #Horizontal Right
         count = 0
         lopbol = True
         itemtex1 = reset_itemtex1
@@ -247,6 +256,11 @@ class Rook():
             for i in pieces:
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex1][itemtex1]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
 class Knight():
@@ -261,7 +275,7 @@ class Knight():
         self.moves = []
 
     def moveGeneration(self):
-            #moves the knight can make
+        #Psuedo-legal moves.
         up_left = self.pos + 17
         left_up = self.pos + 10
         left_down = self.pos - 6
@@ -272,7 +286,6 @@ class Knight():
         right_down = self.pos - 10
         down_right = self.pos - 17
 
-        #adding values to moves before removing the illegal moves
         self.moves.append(up_left)
         self.moves.append(left_up)
         self.moves.append(left_down)
@@ -283,7 +296,7 @@ class Knight():
         self.moves.append(right_down)
         self.moves.append(down_right)
 
-        #removing the illegal moves
+        #Removing the illegal moves based on self-move logic.
         if self.pos in outer_left:
             try:
                 self.moves.remove(up_left)
@@ -348,7 +361,7 @@ class Knight():
             except:
                 pass
 
-        #iffy invalid move reduction. haha
+        #Iffy invalid move reduction. Haha
         for i in self.moves:
             if i < 0:
                 self.moves.remove(i)
@@ -366,9 +379,9 @@ class Bishop():
             self.symbol = "♝"
         self.moves = []
 
-    #locating pos/index in horizontal rows then adding int to find the next diagnoal pos relative to its start
+    #Locating pos/index in horizontal rows then adding int to find the next diagnoal pos relative to its start.
     def moveGeneration(self):
-        #capturing position to make moves relative
+        #Capturing position to make moves relative to starting pos.
         for i in hor_rows:
             for item in i:
                 if item == self.pos:
@@ -383,7 +396,7 @@ class Bishop():
                     itemtex_right = itemtex
                     intex_down2 = intex_down
 
-        #diagonal up-left
+        #Diagonal Up-Left
         count = 0
         lopbol = True
         while count < intex_up and lopbol == True:
@@ -399,7 +412,7 @@ class Bishop():
                     lopbol = False
             count += 1
 
-        #diagonal down-right 
+        #Diagonal Down-Right 
         count = 0
         lopbol = True
         itemtex = reset_itemtex
@@ -417,7 +430,7 @@ class Bishop():
                     lopbol = False
             count += 1
 
-        #diagonal up-right
+        #Diagonal Up-Right
         count = 0
         lopbol = True
         intex = reset_intex
@@ -435,7 +448,7 @@ class Bishop():
                     lopbol = False
             count += 1
 
-        #diagonal down left
+        #Diagonal Down-Left
         count = 0
         lopbol = True
         intex = reset_intex
@@ -454,9 +467,9 @@ class Bishop():
                     lopbol = False
             count += 1
 
-#checking whether the current turns king is in check
+#Checking for self.king in check.
 def kingCheck(self):
-    #no queen since redundant. Just gonna use bishop or rook AND for the checks
+    #No queen since redundant. Just gonna use bishop or rook "AND" for the checks.
     rookCheck = False
     bishopCheck = False
     knightCheck = False
@@ -519,7 +532,7 @@ def kingCheck(self):
             return True
 
 class King():
-    #think of king as a queen but can only make a single move
+    #Think of king as a queen but can only make a single move.
     def __init__(self, team, name, pos):
         self.name = name
         self.pos = pos
@@ -530,16 +543,14 @@ class King():
         elif self.team == "black":
             self.symbol = "♚"
         self.moves = []
-        self.rook_check = [] #list of all moves that could be made by would-be attackers
+        self.rook_check = [] #List of all moves that could be made by any would-be attacker.
         self.knight_check = []
-        self.bishop_check = [] #going to just define the moves seperately as to allow for better piece determination of if truly in check
+        self.bishop_check = []
         self.pawn_check = []
         
-    #check location relative to edges much like the knight logic
-
     #going to reverse all legal moves from this pos to determine if there is an 
     #adaquate piece that would therefore be rendering a check. Also to prevent 
-    #moving into check. Also checkmate.
+    #moving into check and to determie check/stale mate.
     def checkMoveGeneration(self):
         self.rook_check = [] 
         self.knight_check = []
@@ -558,8 +569,8 @@ class King():
             if self.pos - 7 == WhitePawn:
                 self.pawn_check.append(self.pos - 7)
 
-        #takes the current pos and determines if any threats.
-        #will also allow for checking valid positions incase they have check.
+        #Takes the current pos and determines if any threats.
+        #Will also allow for checking valid positions incase they have check.
         for i in hor_rows:
             for item in i:
                 if item == self.pos:
@@ -574,7 +585,7 @@ class King():
                     itemtex_right1 = itemtex1
                     itemtex_left1 = 8 - itemtex1
 
-        #vertical up
+        #Vertical Up
         lopbol = True
         count = 0
         while count < intex_up1 and lopbol == True:
@@ -594,7 +605,7 @@ class King():
 
             count += 1
 
-        #vertical down
+        #Vertical Down
         lopbol = True
         count = 0
         intex1 = reset_intex1
@@ -609,7 +620,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #horizontal left
+        #Horizontal Left
         count = 0
         lopbol = True
         intex1 = reset_intex1
@@ -624,7 +635,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #horizontal right
+        #Horizontal Right
         count = 0
         lopbol = True
         itemtex1 = reset_itemtex1
@@ -653,7 +664,7 @@ class King():
                     itemtex_right = itemtex
                     intex_down2 = intex_down
 
-        #diagonal up-left
+        #Diagonal Up-Left
         count = 0
         lopbol = True
         while count < intex_up and lopbol == True:
@@ -669,7 +680,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #diagonal down-right 
+        #Diagonal Down-Right 
         count = 0
         lopbol = True
         itemtex = reset_itemtex
@@ -687,7 +698,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #diagonal up-right
+        #Diagonal Up-Right
         count = 0
         lopbol = True
         intex = reset_intex
@@ -705,7 +716,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #diagonal down left
+        #Diagonal Down-Left
         count = 0
         lopbol = True
         intex = reset_intex
@@ -723,7 +734,8 @@ class King():
                 if hor_rows[intex][itemtex] == i.pos:
                     lopbol = False
             count += 1
-    #knight checks
+
+        #Knight Checks
         up_left = self.pos + 17
         left_up = self.pos + 10
         left_down = self.pos - 6
@@ -734,7 +746,6 @@ class King():
         right_down = self.pos - 10
         down_right = self.pos - 17
 
-        #adding values to moves before removing the illegal moves
         self.knight_check.append(up_left)
         self.knight_check.append(left_up)
         self.knight_check.append(left_down)
@@ -745,7 +756,6 @@ class King():
         self.knight_check.append(right_down)
         self.knight_check.append(down_right)
 
-        #removing the illegal moves
         if self.pos in outer_left:
             try:
                 self.knight_check.remove(up_left)
@@ -810,7 +820,6 @@ class King():
             except:
                 pass
 
-        #iffy invalid move reduction. haha
         for i in self.knight_check:
             if i < 0:
                 self.knight_check.remove(i)
@@ -818,15 +827,14 @@ class King():
                 self.knight_check.remove(i)   
 
     def clearCheckMoves(self):
-        #again no queen since queen is redundantly using rook and bishop moves.
-        #instead including it in checking the piece name for kingCheck
+        #Again no queen since queen will be determined using rook and bishop moves.
+        #Instead including it in checking the piece name for kingCheck.
         self.rook_check = []
         self.knight_check = []
         self.bishop_check = []
         self.pawn_check = []                     
 
     def moveGeneration(self):
-        #indexing the location of piece to allow for movement generation stemming from position
         for i in hor_rows:
             for item in i:
                 if item == self.pos:
@@ -841,7 +849,7 @@ class King():
                     itemtex_right1 = (itemtex1 - itemtex1) + 1
                     itemtex_left1 = (itemtex1 - itemtex1) + 1
 
-        #vertical up
+        #Vertical Up
         lopbol = True
         count = 0
         while count < intex_up1 and lopbol == True:
@@ -855,7 +863,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #vertical down
+        #Vertical Down
         lopbol = True
         count = 0
         intex1 = reset_intex1
@@ -872,7 +880,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #horizontal left
+        #Horizontal Left
         count = 0
         lopbol = True
         intex1 = reset_intex1
@@ -887,7 +895,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #horizontal right
+        #Horizontal Right
         count = 0
         lopbol = True
         itemtex1 = reset_itemtex1
@@ -901,6 +909,7 @@ class King():
                 if hor_rows[intex1][itemtex1] == i.pos:
                     lopbol = False
             count += 1
+
         for i in hor_rows:
             for item in i:
                 if item == self.pos:
@@ -915,7 +924,7 @@ class King():
                     itemtex_right = itemtex
                     intex_down2 = intex_down
 
-        #diagonal up-left
+        #Diagonal Up-Left
         count = 0
         lopbol = True
         while count < intex_up and lopbol == True:
@@ -932,7 +941,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #diagonal down-right 
+        #Diagonal Down-Right 
         count = 0
         lopbol = True
         itemtex = reset_itemtex
@@ -951,7 +960,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #diagonal up-right
+        #Diagonal Up-Right
         count = 0
         lopbol = True
         intex = reset_intex
@@ -970,7 +979,7 @@ class King():
                     lopbol = False
             count += 1
 
-        #diagonal down left
+        #Diagonal Down-Left
         count = 0
         lopbol = True
         intex = reset_intex
@@ -990,7 +999,6 @@ class King():
                     lopbol = False
             count += 1
 
-        #Need to check a returned value, issue is with that.
         for i in self.moves:
             for piece in pieces:
                 if i == piece.pos:
@@ -1008,9 +1016,7 @@ class Queen():
             self.symbol = "♛"
         self.moves = []
 
-    #function that keep tracks of what row and col piece is on to allow for easier move search in regards to rows and cols
     def moveGeneration(self):
-        #indexing the location of piece to allow for movement generation stemming from position
         for i in hor_rows:
             for item in i:
                 if item == self.pos:
@@ -1025,7 +1031,7 @@ class Queen():
                     itemtex_right1 = itemtex1
                     itemtex_left1 = 8 - itemtex1
 
-        #vertical up
+        #Vertical Up
         lopbol = True
         count = 0
         while count < intex_up1 and lopbol == True:
@@ -1039,7 +1045,7 @@ class Queen():
                     lopbol = False
             count += 1
 
-        #vertical down
+        #Vertical Down
         lopbol = True
         count = 0
         intex1 = reset_intex1
@@ -1054,7 +1060,7 @@ class Queen():
                     lopbol = False
             count += 1
 
-        #horizontal left
+        #Horizontal Left
         count = 0
         lopbol = True
         intex1 = reset_intex1
@@ -1069,7 +1075,7 @@ class Queen():
                     lopbol = False
             count += 1
 
-        #horizontal right
+        #Horizontal Right
         count = 0
         lopbol = True
         itemtex1 = reset_itemtex1
@@ -1098,7 +1104,7 @@ class Queen():
                     itemtex_right = itemtex
                     intex_down2 = intex_down
 
-        #diagonal up-left
+        #Diagonal Up-Left
         count = 0
         lopbol = True
         while count < intex_up and lopbol == True:
@@ -1114,7 +1120,7 @@ class Queen():
                     lopbol = False
             count += 1
 
-        #diagonal down-right 
+        #Diagonal Down-Right 
         count = 0
         lopbol = True
         itemtex = reset_itemtex
@@ -1132,7 +1138,7 @@ class Queen():
                     lopbol = False
             count += 1
 
-        #diagonal up-right
+        #Diagonal Up-Right
         count = 0
         lopbol = True
         intex = reset_intex
@@ -1150,7 +1156,7 @@ class Queen():
                     lopbol = False
             count += 1
 
-        #diagonal down left
+        #Diagonal Down-Left
         count = 0
         lopbol = True
         intex = reset_intex
@@ -1170,8 +1176,8 @@ class Queen():
             count += 1
 
 pieces = []
-#starting pos of all pieces
-#white krook
+#Starting pos of all pieces.
+#Rooks
 wrook1 = Rook("white", "wrook1", 15)
 pieces.append(wrook1)
 # wrook2 = Rook("white", "wrook2", 8)
@@ -1182,7 +1188,7 @@ pieces.append(brook1)
 # brook2 = Rook("black", "brook2", 57)
 # pieces.append(brook2)
 
-#whiteknight
+#Knights
 # wknight1 = Knight("white", "wnight1", 2)
 # pieces.append(wknight1)
 # wknight2 = Knight("white", "wnight2", 7)
@@ -1193,6 +1199,7 @@ pieces.append(brook1)
 # bknight2 = Knight("black", "brook2", 58)
 # pieces.append(bknight2)
 
+#Bishops
 # wbishop1 = Bishop("white", "wbishop1", 3)
 # pieces.append(wbishop1)
 # wbishop2 = Bishop("white", "wbisop2", 6)
@@ -1203,16 +1210,19 @@ pieces.append(brook1)
 # bbishop2 = Bishop("black", "bbishop2", 59)
 # pieces.append(bbishop2)
 
+#Kings
 wking = King("white", "wking", 5)
 pieces.append(wking)
 bking = King("black", "bking", 61)
 pieces.append(bking)
 
+#Queens
 # wquen = Queen("white", "wquen1", 4)
 # pieces.append(wquen)
 # bquen = Queen("black", "bquen1", 60)
 # pieces.append(bquen)
 
+#Pawns
 # wpawn1 = WhitePawn("white", "wpawn1", 9)
 # wpawn2 = WhitePawn("white", "wpawn2", 10)
 # wpawn3 = WhitePawn("white", "wpawn3", 11)
@@ -1246,21 +1256,6 @@ pieces.append(wpawn6)
 # pieces.append(bpawn6)
 # pieces.append(bpawn7)
 # pieces.append(bpawn8)
-
-    #functions outside of the object
-    #might make a seperate file for them but also maybe not
-#checking for residence
-def checkSquare(piece_to_move, value=int):
-    occupied = False
-    for item in pieces:
-        if int(item) == int(piece_to_move.pos):
-         continue
-        if int(item) == int(value):
-            occupied = True
-    if occupied == True:
-        return True
-    else:
-        return False
     
 def makeMove(self, pos=int):
     canExecute = False
@@ -1292,9 +1287,7 @@ def makeMove(self, pos=int):
 def clearMoves(self):
     self.moves = []
 
-#for testing purposes
-#converting board into cli
-
+#Converting board into cli display.
 def printBoard():
     board = [1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 ,
         9 , 10, 11, 12, 13, 14, 15, 16, 
@@ -1329,37 +1322,68 @@ def clearAllMoves():
     for piece in pieces:
         piece.moves = []
 
+#Function for making and unmaking moves to check legality. Make/Unmake.
+#Main difference between this and "makeMove" is that this function does not remove pieces
+#position and instead checks using a "taken" piece's pos.
+def legalMakeMove(self, pos):
+    canExecute = False
+    if pos in self.moves:
+        canExecute = True
+    else:
+        canExecute = False
+
+    posTaken = False
+    if canExecute:
+        for i in pieces:
+            if i.pos == pos:
+                if i.team != self.team:
+                    piece = i
+                    posTaken = True
+                    break
+                elif i.team == self.team:
+                    canExecute = False
+                else:
+                    posTaken = False
+
+    if canExecute == True and posTaken == True:
+        self.pos = piece.pos
+
+    if canExecute == True and posTaken == False:
+        self.pos = pos   
+
 #For own team making compromising moves. 
 #This does not include enemy causing a check on their turn.
 #Also generates all specified piece moves.
 def legalMoves():
-    for piece in pieces:
-        if piece.team == "white":
+    if gameTurn == "white":
+        for piece in pieces:
             reset = piece.pos
-            piece.moveGeneration()
-            for move in reversed(piece.moves): #reversed list mostly for keeping pawn's double move available
-                makeMove(piece, move)
-                wking.checkMoveGeneration()
-                if kingCheck(wking):
-                    print(f"King Check! From move {move}!")
-                    time.sleep(.5)
-                    piece.moves.remove(move)
-                wking.clearCheckMoves()
+            if piece.team == "white":
+                piece.moveGeneration()
+                for move in reversed(piece.moves): #reversed list mostly for keeping pawn's double move available
+                    legalMakeMove(piece, move)
+                    wking.checkMoveGeneration()
+                    if kingCheck(wking):
+                        print(f"White-King Check! From move {move}!")
+                        time.sleep(.5)
+                        piece.moves.remove(move)
+                    wking.clearCheckMoves()
             piece.pos = reset
 
-    for piece in pieces:
-        if piece.team == "black":
-            reset = piece.pos
-            piece.moveGeneration()
-            for move in reversed(piece.moves):
-                makeMove(piece, move)
-                bking.checkMoveGeneration()
-                if kingCheck(bking):
-                    print(f"King Check! From move {move}!")
-                    time.sleep(.5)
-                    piece.moves.remove(move)
-                bking.clearCheckMoves()
-            piece.pos = reset
+    if gameTurn == "black":
+        for piece in pieces:
+            if piece.team == "black":
+                reset = piece.pos
+                piece.moveGeneration()
+                for move in reversed(piece.moves):
+                    legalMakeMove(piece, move)
+                    bking.checkMoveGeneration()
+                    if kingCheck(bking):
+                        print(f"Black-King Check! From move {move}!")
+                        time.sleep(.5)
+                        piece.moves.remove(move)
+                    bking.clearCheckMoves()
+                piece.pos = reset
             
 
 def gameTesting():
@@ -1377,10 +1401,11 @@ def gameTesting():
             for piece in pieces:
                 if piece.team == "black":
                     pnames.append(piece.name)
-        print(pnames)
-        pnames = []
 
         legalMoves()
+
+        print(pnames)
+        pnames = []
 
         name_loop = True
         while name_loop:
