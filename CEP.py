@@ -37,13 +37,11 @@ class WhitePawn():
         self.name = name
         self.pos = pos
         self.symbol = "♙"
-        
         self.doublemove = True
         self.moves = [] #Psuedo-legal moves that can be made.
 
     def moveGeneration(self):
         if self.team == "white":
-
             in_left = False
             in_right = False
             #For single move (since pawns can't take head on regardless).
@@ -1279,7 +1277,7 @@ def makeMove(self, pos=int):
 
     if canExecute == True and posTaken == True:
         self.pos = piece.pos
-        piece.pos = 65
+        pieces.remove(piece)
 
     if canExecute == True and posTaken == False:
         self.pos = pos    
@@ -1325,7 +1323,9 @@ def clearAllMoves():
 #Function for making and unmaking moves to check legality. Make/Unmake.
 #Main difference between this and "makeMove" is that this function does not remove pieces
 #position and instead checks using a "taken" piece's pos.
+pieces_displaced = {} #Storing a dictionary of original pieces and their values to make restoring/"unmaking" moves easy.
 def legalMakeMove(self, pos):
+    global pieces_displaced
     canExecute = False
     if pos in self.moves:
         canExecute = True
@@ -1345,11 +1345,23 @@ def legalMakeMove(self, pos):
                 else:
                     posTaken = False
 
-    if canExecute == True and posTaken == True:
+    if canExecute and posTaken:
         self.pos = piece.pos
+        pieces_displaced[piece.name] = piece.pos
+        piece.pos = 65
 
     if canExecute == True and posTaken == False:
-        self.pos = pos   
+        self.pos = pos
+
+#Reseting the position of pieces taken in LegalMakeMoves.
+def postLegalMakeMove():
+    global pieces_displaced
+    for i in pieces:
+        for k in pieces_displaced:
+            if i.name == k:
+                i.pos = int(pieces_displaced[k])
+
+    pieces_displaced = {}   
 
 #For own team making compromising moves. 
 #This does not include enemy causing a check on their turn.
@@ -1368,7 +1380,8 @@ def legalMoves():
                         time.sleep(.5)
                         piece.moves.remove(move)
                     wking.clearCheckMoves()
-            piece.pos = reset
+                    postLegalMakeMove()
+                piece.pos = reset
 
     if gameTurn == "black":
         for piece in pieces:
@@ -1383,14 +1396,15 @@ def legalMoves():
                         time.sleep(.5)
                         piece.moves.remove(move)
                     bking.clearCheckMoves()
+                    postLegalMakeMove()
                 piece.pos = reset
-            
 
 def gameTesting():
     global gameTurn
     pnames = []
     active = True
     while active:
+        print("\n")
         time.sleep(1.5)
         printBoard()
         if gameTurn == "white":
@@ -1404,7 +1418,7 @@ def gameTesting():
 
         legalMoves()
 
-        print(pnames)
+        print(f"\n{pnames}")
         pnames = []
 
         name_loop = True
@@ -1436,7 +1450,7 @@ def gameTesting():
             print("There was an error making the move.")
 
         clearAllMoves()
-
+        
         gameTurnComplete()
 
 gameTesting()
