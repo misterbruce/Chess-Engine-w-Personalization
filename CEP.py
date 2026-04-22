@@ -177,23 +177,52 @@ def pieceGen(team, name, position, generate=int):
         return Queen(team, name, position)
         
 promoCount = 0
+promoRooks = []
+promoKnights = []
+promoBishops = []
+
 def pawnPromo(piece):
     global promoCount
-    promo_val = 1
+    promo_val = randint(1, 4)
     if promo_val == 1:
         piece_name = str(promoCount) + piece.team + "Rook"
-        promoRook = pieceGen(piece.team, piece_name, piece.pos, 1)
+        promoPiece = pieceGen(piece.team, piece_name, piece.pos, 1)
         pieces.remove(piece)
-        pieces.append(promoRook)
-
+        pieces.append(promoPiece)
+        promoRooks.append(promoPiece)
+        promoCount += 1
+    if promo_val == 2:
+        piece_name = str(promoCount) + piece.team + "Knight"
+        promoPiece = pieceGen(piece.team, piece_name, piece.pos, 2)
+        pieces.remove(piece)
+        pieces.append(promoPiece)
+        promoKnights.append(promoPiece)
+        promoCount += 1
+    if promo_val == 3:
+        piece_name = str(promoCount) + piece.team + "Bishop"
+        promoPiece = pieceGen(piece.team, piece_name, piece.pos, 3)
+        pieces.remove(piece)
+        pieces.append(promoPiece)
+        promoBishops.append(promoPiece)
+        promoCount += 1
+    if promo_val == 4:
+        piece_name = str(promoCount) + piece.team + "Queen"
+        promoPiece = pieceGen(piece.team, piece_name, piece.pos, 4)
+        pieces.remove(piece)
+        pieces.append(promoPiece)
+        promoRooks.append(promoPiece)
+        promoBishops.append(promoPiece)
         promoCount += 1
 
 def promoCheck(piece):
     for p in pieces:
         if p.name == piece.name:
-            if piece.pos > 56:
-                pawnPromo(piece)
-
+            if p.team == "white":
+                if piece.pos > 56:
+                    pawnPromo(piece)
+            if p.team == "black":
+                if piece.pos < 9:
+                    pawnPromo(piece)
 
 class Rook():
     def __init__(self, team, name, pos):
@@ -535,6 +564,30 @@ class Bishop():
  
 #Checking for self.king in check.
 def kingCheck(self):
+    white_promoRooks = []
+    black_promoRooks = []
+    for i in promoRooks:
+        if i.team == "white":
+            white_promoRooks.append(i)
+        if i.team == "black":
+            black_promoRooks.append(i)
+
+    white_promoKnights = []
+    black_promoKnights = []
+    for i in promoKnights:
+        if i.team == "white":
+            white_promoKnights.append(i)
+        if i.team == "black":
+            black_promoKnights.append(i)
+
+    white_promoBishops = []
+    black_promoBishops = []
+    for i in promoBishops:
+        if i.team == "white":
+            white_promoBishops.append(i)
+        if i.team == "black":
+            black_promoBishops.append(i)
+
     #No queen since redundant. Just gonna use bishop or rook "AND" for the checks.
     rookCheck = False
     bishopCheck = False
@@ -545,19 +598,19 @@ def kingCheck(self):
         for pot_check in self.rook_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "brook1" or piece.name == "brook2" or piece.name == "bquen1":
+                    if piece.name == "brook1" or piece.name == "brook2" or piece.name == "bquen1" or piece in black_promoRooks:
                         rookCheck = True
 
         for pot_check in self.bishop_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "bbishop1" or piece.name == "bbishop2" or piece.name == "bquen1":
+                    if piece.name == "bbishop1" or piece.name == "bbishop2" or piece.name == "bquen1" or piece in black_promoBishops:
                         bishopCheck = True
         
         for pot_check in self.knight_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "bknight1" or piece.name == "bknight2":
+                    if piece.name == "bknight1" or piece.name == "bknight2" or piece in black_promoKnights:
                         knightCheck = True
 
         for pot_check in self.pawn_check:
@@ -573,19 +626,19 @@ def kingCheck(self):
         for pot_check in self.rook_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "wrook1" or piece.name == "wrook2" or piece.name == "wquen1" or piece.name == "0whiteRook":
+                    if piece.name == "wrook1" or piece.name == "wrook2" or piece.name == "wquen1" or piece in white_promoRooks:
                         rookCheck = True
 
         for pot_check in self.bishop_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "wbishop1" or piece.name == "wbishop2" or piece.name == "wquen1":
+                    if piece.name == "wbishop1" or piece.name == "wbishop2" or piece.name == "wquen1" or piece in white_promoBishops:
                         bishopCheck = True
         
         for pot_check in self.knight_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "wknight1" or piece.name == "wknight2":
+                    if piece.name == "wknight1" or piece.name == "wknight2" or piece in white_promoKnights:
                         knightCheck = True
 
         for pot_check in self.pawn_check:
@@ -1253,7 +1306,7 @@ pieces = []
 #Rooks
 wrook1 = Rook("white", "wrook1", 1)
 pieces.append(wrook1)
-wrook2 = Rook("white", "wrook2", 8)
+wrook2 = Rook("white", "wrook2", 7)
 pieces.append(wrook2)
 
 # brook1 = Rook("black", "brook1", 64)
@@ -1297,7 +1350,7 @@ pieces.append(bking)
 
 #Pawns
 wpawn1 = WhitePawn("white", "wpawn1", 49)
-# wpawn2 = WhitePawn("white", "wpawn2", 10)
+wpawn2 = WhitePawn("white", "wpawn2", 50)
 # wpawn3 = WhitePawn("white", "wpawn3", 11)
 # wpawn4 = WhitePawn("white", "wpawn4", 12)
 # wpawn5 = WhitePawn("white", "wpawn5", 13)
@@ -1305,7 +1358,7 @@ wpawn1 = WhitePawn("white", "wpawn1", 49)
 # wpawn7 = WhitePawn("white", "wpawn7", 15)
 # wpawn8 = WhitePawn("white", "wpawn8", 16)
 pieces.append(wpawn1)
-# pieces.append(wpawn2)
+pieces.append(wpawn2)
 # pieces.append(wpawn3)
 # pieces.append(wpawn4)
 # pieces.append(wpawn5)
@@ -1313,7 +1366,7 @@ pieces.append(wpawn1)
 # pieces.append(wpawn7)
 # pieces.append(wpawn8)
 
-bpawn1 = BlackPawn("black", "bpawn1", 56)
+bpawn1 = BlackPawn("black", "bpawn1", 16)
 # bpawn2 = BlackPawn("black", "bpawn2", 55)
 # bpawn3 = BlackPawn("black", "bpawn3", 54)
 # bpawn4 = BlackPawn("black", "bpawn4", 53)
@@ -1641,6 +1694,36 @@ def gameTesting():
 
         legalMoves()
 
+        if gameTurn == "white":
+            for piece in pieces:
+                if piece.team == "white":
+                    noMoves = True
+                    if piece.moves:
+                        noMoves = False
+            if noMoves:
+                wking.checkMoveGeneration()
+                if kingCheck(wking):
+                    print("White-King is Checkmated.")
+                    active = False
+                else:
+                    print("White-King has been Stalemated.")
+                    active = False
+
+        if gameTurn == "black":
+            for piece in pieces:
+                if piece.team == "black":
+                    noMoves = True
+                    if piece.moves:
+                        noMoves = False
+            if noMoves:
+                bking.checkMoveGeneration()
+                if kingCheck(bking):
+                    print("Black-King is Checkmated.")
+                    active = False
+                else:
+                    print("Black-King has been Stalemated.")
+                    active = False
+
         time.sleep(1)
 
         print(pnames)
@@ -1676,8 +1759,9 @@ def gameTesting():
             makeMove(piece_call, int(piece_move))
             print(f"{piece_call.name} moved to {piece_move}.")
             playerGameNotation(piece_call.name, piece_move) #For appending to the pgn data structure.
-            if piece_call.name == "wpawn1":
-                promoCheck(wpawn1)
+            for piece in pieces:
+                if piece.symbol == "♙" or piece.symbol == "♟":
+                    promoCheck(piece)
             clearMoves(piece_call)
         except:
             print("There was an error making the move.")
