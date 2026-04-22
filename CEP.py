@@ -1,5 +1,6 @@
 from random import randint
 import time
+import copy
 
 gameTurn = "white"
 def gameTurnComplete():
@@ -98,6 +99,12 @@ class WhitePawn():
                 if i < 0 or i > 64:
                     self.moves.remove(i)
 
+            for piece in pieces:
+                for move in self.moves:
+                    if piece.team == self.team:
+                        if piece.pos == move:
+                            self.moves.remove(move)
+
 #Opposite math from white pawns.
 class BlackPawn():
     def __init__(self, team, name, pos):
@@ -152,6 +159,41 @@ class BlackPawn():
             for i in self.moves:
                 if i < 0 or i > 64:
                     self.moves.remove(i)
+
+            for piece in pieces:
+                for move in self.moves:
+                    if piece.team == self.team:
+                        if piece.pos == move:
+                            self.moves.remove(move)
+
+def pieceGen(team, name, position, generate=int):
+    if generate == 1:
+        return Rook(team, name, position)
+    if generate == 2:
+        return Knight(team, name, position)
+    if generate == 3:
+        return Bishop(team, name, position)
+    if generate == 4:
+        return Queen(team, name, position)
+        
+promoCount = 0
+def pawnPromo(piece):
+    global promoCount
+    promo_val = 1
+    if promo_val == 1:
+        piece_name = str(promoCount) + piece.team + "Rook"
+        promoRook = pieceGen(piece.team, piece_name, piece.pos, 1)
+        pieces.remove(piece)
+        pieces.append(promoRook)
+
+        promoCount += 1
+
+def promoCheck(piece):
+    for p in pieces:
+        if p.name == piece.name:
+            if piece.pos > 56:
+                pawnPromo(piece)
+
 
 class Rook():
     def __init__(self, team, name, pos):
@@ -365,6 +407,12 @@ class Knight():
                 self.moves.remove(i)
             if i > 64:
                 self.moves.remove(i)
+        
+        for piece in pieces:
+            for move in self.moves:
+                if piece.team == self.team:
+                    if piece.pos == move:
+                        self.moves.remove(move)
             
 class Bishop():
     def __init__(self, team, name, pos):
@@ -408,6 +456,11 @@ class Bishop():
             for i in pieces:
                 if hor_rows[intex][itemtex] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex][itemtex]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
         #Diagonal Down-Right 
@@ -426,6 +479,11 @@ class Bishop():
             for i in pieces:
                 if hor_rows[intex][itemtex] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex][itemtex]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
         #Diagonal Up-Right
@@ -444,6 +502,11 @@ class Bishop():
             for i in pieces:
                 if hor_rows[intex][itemtex] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex][itemtex]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
 
         #Diagonal Down-Left
@@ -463,8 +526,13 @@ class Bishop():
             for i in pieces:
                 if hor_rows[intex][itemtex] == i.pos:
                     lopbol = False
+                    check_pos = hor_rows[intex][itemtex]
+                    for piece in pieces:
+                        if piece.pos == check_pos:
+                            if piece.team == self.team:
+                                self.moves.remove(check_pos)
             count += 1
-
+ 
 #Checking for self.king in check.
 def kingCheck(self):
     #No queen since redundant. Just gonna use bishop or rook "AND" for the checks.
@@ -477,13 +545,13 @@ def kingCheck(self):
         for pot_check in self.rook_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "brook1" or piece.name == "brook2" or piece.name == "bquen":
+                    if piece.name == "brook1" or piece.name == "brook2" or piece.name == "bquen1":
                         rookCheck = True
 
         for pot_check in self.bishop_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "bbishop1" or piece.name == "bbishop2" or piece.name == "bquen":
+                    if piece.name == "bbishop1" or piece.name == "bbishop2" or piece.name == "bquen1":
                         bishopCheck = True
         
         for pot_check in self.knight_check:
@@ -505,13 +573,13 @@ def kingCheck(self):
         for pot_check in self.rook_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "wrook1" or piece.name == "wrook2" or piece.name == "wquen":
+                    if piece.name == "wrook1" or piece.name == "wrook2" or piece.name == "wquen1" or piece.name == "0whiteRook":
                         rookCheck = True
 
         for pot_check in self.bishop_check:
             for piece in pieces:
                 if pot_check == piece.pos:
-                    if piece.name == "wbishop1" or piece.name == "wbishop2" or piece.name == "wquen":
+                    if piece.name == "wbishop1" or piece.name == "wbishop2" or piece.name == "wquen1":
                         bishopCheck = True
         
         for pot_check in self.knight_check:
@@ -997,11 +1065,11 @@ class King():
                     lopbol = False
             count += 1
 
-        for i in self.moves:
-            for piece in pieces:
-                if i == piece.pos:
-                    if self.team == piece.team:
-                        self.moves.remove(i)
+        for piece in pieces:
+            for move in self.moves:
+                if piece.team == self.team:
+                    if piece.pos == move:
+                        self.moves.remove(move)
 
 class Queen():
     def __init__(self, team, name, pos):
@@ -1173,34 +1241,41 @@ class Queen():
                     lopbol = False
             count += 1
 
+        for piece in pieces:
+            for move in self.moves:
+                if piece.team == self.team:
+                    if piece.pos == move:
+                        self.moves.remove(move)
+
 pieces = []
+
 #Starting pos of all pieces.
 #Rooks
-wrook1 = Rook("white", "wrook1", 15)
+wrook1 = Rook("white", "wrook1", 1)
 pieces.append(wrook1)
-# wrook2 = Rook("white", "wrook2", 8)
-# pieces.append(wrook2)
+wrook2 = Rook("white", "wrook2", 8)
+pieces.append(wrook2)
 
-brook1 = Rook("black", "brook1", 64)
-pieces.append(brook1)
+# brook1 = Rook("black", "brook1", 64)
+# pieces.append(brook1)
 # brook2 = Rook("black", "brook2", 57)
 # pieces.append(brook2)
 
-#Knights
+# Knights
 # wknight1 = Knight("white", "wnight1", 2)
 # pieces.append(wknight1)
 # wknight2 = Knight("white", "wnight2", 7)
 # pieces.append(wknight2)
 
-# bknight1 = Knight("black", "brook1", 63)
+# bknight1 = Knight("black", "bnight1", 63)
 # pieces.append(bknight1)
-# bknight2 = Knight("black", "brook2", 58)
+# bknight2 = Knight("black", "bnight2", 58)
 # pieces.append(bknight2)
 
-#Bishops
+# Bishops
 # wbishop1 = Bishop("white", "wbishop1", 3)
 # pieces.append(wbishop1)
-# wbishop2 = Bishop("white", "wbisop2", 6)
+# wbishop2 = Bishop("white", "wbishop2", 6)
 # pieces.append(wbishop2)
 
 # bbishop1 = Bishop("black", "bbishop1", 62)
@@ -1221,24 +1296,24 @@ pieces.append(bking)
 # pieces.append(bquen)
 
 #Pawns
-# wpawn1 = WhitePawn("white", "wpawn1", 9)
+wpawn1 = WhitePawn("white", "wpawn1", 49)
 # wpawn2 = WhitePawn("white", "wpawn2", 10)
 # wpawn3 = WhitePawn("white", "wpawn3", 11)
 # wpawn4 = WhitePawn("white", "wpawn4", 12)
 # wpawn5 = WhitePawn("white", "wpawn5", 13)
-wpawn6 = WhitePawn("white", "wpawn6", 14)
+# wpawn6 = WhitePawn("white", "wpawn6", 14)
 # wpawn7 = WhitePawn("white", "wpawn7", 15)
 # wpawn8 = WhitePawn("white", "wpawn8", 16)
-# pieces.append(wpawn1)
+pieces.append(wpawn1)
 # pieces.append(wpawn2)
 # pieces.append(wpawn3)
 # pieces.append(wpawn4)
 # pieces.append(wpawn5)
-pieces.append(wpawn6)
+# pieces.append(wpawn6)
 # pieces.append(wpawn7)
 # pieces.append(wpawn8)
 
-# bpawn1 = BlackPawn("black", "bpawn1", 56)
+bpawn1 = BlackPawn("black", "bpawn1", 56)
 # bpawn2 = BlackPawn("black", "bpawn2", 55)
 # bpawn3 = BlackPawn("black", "bpawn3", 54)
 # bpawn4 = BlackPawn("black", "bpawn4", 53)
@@ -1246,7 +1321,7 @@ pieces.append(wpawn6)
 # bpawn6 = BlackPawn("black", "bpawn6", 51)
 # bpawn7 = BlackPawn("black", "bpawn7", 50)
 # bpawn8 = BlackPawn("black", "bpawn8", 49)
-# pieces.append(bpawn1)
+pieces.append(bpawn1)
 # pieces.append(bpawn2)
 # pieces.append(bpawn3)
 # pieces.append(bpawn4)
@@ -1263,7 +1338,7 @@ def makeMove(self, pos=int):
         canExecute = False
 
     posTaken = False
-    if canExecute == True:
+    if canExecute:
         for i in pieces:
             if i.pos == pos:
                 if i.team != self.team:
@@ -1275,11 +1350,11 @@ def makeMove(self, pos=int):
                 else:
                     posTaken = False
 
-    if canExecute == True and posTaken == True:
+    if canExecute and posTaken:
         self.pos = piece.pos
         pieces.remove(piece)
 
-    if canExecute == True and posTaken == False:
+    if canExecute and posTaken == False:
         self.pos = pos    
     
 def clearMoves(self):
@@ -1348,9 +1423,9 @@ def legalMakeMove(self, pos):
     if canExecute and posTaken:
         self.pos = piece.pos
         pieces_displaced[piece.name] = piece.pos
-        piece.pos = 65
+        piece.pos = 100
 
-    if canExecute == True and posTaken == False:
+    if canExecute and posTaken == False:
         self.pos = pos
 
 #Reseting the position of pieces taken in LegalMakeMoves.
@@ -1360,7 +1435,6 @@ def postLegalMakeMove():
         for k in pieces_displaced:
             if i.name == k:
                 i.pos = int(pieces_displaced[k])
-
     pieces_displaced = {}   
 
 #For own team making compromising moves. 
@@ -1399,13 +1473,59 @@ def legalMoves():
                     postLegalMakeMove()
                 piece.pos = reset
 
-def gameTesting():
+#For generating a pgn of the game. (Allows for easy legality/ AI chatbot analysis).
+pgn = {}
+pgn_count = 0
+def playerGameNotation(piece, position):
+    #Enters a piece and stores position accordingly.
+    global pgn_count
+    letter = "placeholder"
+    number = 10
+
+    #Capturing the location of the piece moved relative to the 2D array (board representation).
+    for row in hor_rows:
+        for item in row:
+            if item == position:
+                row_index = hor_rows.index(row)
+                item_index = row.index(item)
+
+                if item_index == 0:
+                    letter = "H"
+                elif item_index == 1:
+                    letter = "G"
+                elif item_index == 2:
+                    letter = "F"
+                elif item_index == 3:
+                    letter = "E"
+                elif item_index == 4:
+                    letter = "D"
+                elif item_index == 5:
+                    letter = "C"
+                elif item_index == 6:
+                    letter = "B"
+                elif item_index == 7:
+                    letter = "A"
+
+    piece = str(pgn_count) + "_" + piece
+
+    try:
+        colrow = str(letter) + str(row_index + 1) #Concatenate string and integer into a "board position".
+    except:
+        print("Error with concatenation.")
+
+    pgn[piece] = colrow
+    pgn_count += 1
+
+#For automated play (random moves).
+def autoTesting():
+    global pgn
     global gameTurn
     pnames = []
     active = True
     while active:
         print("\n")
-        time.sleep(1.5)
+        time.sleep(2.25)
+        print("--- New Board-State ---")
         printBoard()
         if gameTurn == "white":
             for piece in pieces:
@@ -1418,25 +1538,58 @@ def gameTesting():
 
         legalMoves()
 
-        print(f"\n{pnames}")
-        pnames = []
+        #Checking for game end situations.
+        potential_moves = [] 
+        if gameTurn == "white":
+            for piece in pieces:
+                if piece.team == "white":
+                    if piece.moves:
+                        potential_moves.append(piece.moves)
+            if not potential_moves:
+                wking.checkMoveGeneration()
+                if kingCheck(wking):
+                    print("White-King has been Checkmated!")
+                else:
+                    print("White-King has been Stalemated!")
+                active = False
+            potential_moves = []
+        if gameTurn == "black":
+            for piece in pieces:
+                if piece.team == "black":
+                    if piece.moves:
+                        potential_moves.append(piece.moves)
+            if not potential_moves:
+                bking.checkMoveGeneration()
+                if kingCheck(wking):
+                    print("Black-King has been Checkmated!")
+                else:
+                    print("Black-King has been Stalemated!")
+                    active = False
+            potential_moves = []
+        time.sleep(1)
 
         name_loop = True
         while name_loop:
-            piece_selection = input("Which piece would you like to move?\n") 
+            name_key = randint(0, len(pnames))
+            piece_selection = pnames[name_key - 1] 
             for piece in pieces:
                 if piece.name == piece_selection:
                     if piece.team == gameTurn and piece.moves != []:
                         piece_call = piece
                         name_loop = False
                     elif not piece.moves:
-                        print("There are no legal moves for this piece.")
-        
-        print(f"Available moves of {piece_selection} are: \n{piece_call.moves}")
+                        print(f"There are no legal moves for {piece_selection}.")
+        pnames = []
+        time.sleep(1)
+        print(f"{piece_selection} has been selected.")
+        time.sleep(.5)
+        print(f"\nAvailable moves of {piece_selection} are: \n{piece_call.moves}")
+        time.sleep(1)
 
+        move_key = randint(0, len(piece_call.moves))
         move_loop = True
         while move_loop and name_loop == False:
-            piece_move = input("Where should it move?\n")
+            piece_move = piece_call.moves[move_key - 1]
             for move in piece_call.moves:
                 try:
                     if int(piece_move) == move:
@@ -1445,12 +1598,102 @@ def gameTesting():
                     print("There was an error with checking the entered piece move.")
         try:
             makeMove(piece_call, int(piece_move))
+            print(f"{piece_call.name} moved to {piece_move}.")
+            playerGameNotation(piece_call.name, piece_move) #For appending to the pgn data structure.
             clearMoves(piece_call)
         except:
             print("There was an error making the move.")
 
         clearAllMoves()
         
+        if wking not in pieces:
+            print("White-King has been removed from the game!")
+            break
+
+        if bking not in pieces:
+            print("Black-King has been removed from the game!")
+            break
+        
+        print(f"\npgn: {pgn}")
+
+        gameTurnComplete()
+    
+
+#For manual testing.
+def gameTesting():
+    global pgn
+    global gameTurn
+    pnames = []
+    active = True
+    while active:
+        print("\n")
+        time.sleep(2.25)
+        print("--- New Board-State ---")
+        printBoard()
+        if gameTurn == "white":
+            for piece in pieces:
+                if piece.team == "white":
+                    pnames.append(piece.name)
+        if gameTurn == "black":
+            for piece in pieces:
+                if piece.team == "black":
+                    pnames.append(piece.name)
+
+        legalMoves()
+
+        time.sleep(1)
+
+        print(pnames)
+
+        name_loop = True
+        while name_loop:
+            piece_selection = input("Enter a piece to move:\n")
+            for piece in pieces:
+                if piece.name == piece_selection:
+                    if piece.team == gameTurn and piece.moves != []:
+                        piece_call = piece
+                        name_loop = False
+                    elif not piece.moves:
+                        print(f"There are no legal moves for {piece_selection}.")
+        pnames = []
+        time.sleep(1)
+        print(f"{piece_selection} has been selected.")
+        time.sleep(.5)
+        print(f"\nAvailable moves of {piece_selection} are: \n{piece_call.moves}")
+        time.sleep(1)
+
+        move_loop = True
+        while move_loop and name_loop == False:
+            piece_move = input("Enter the move to make:\n")
+            for move in piece_call.moves:
+                try:
+                    if int(piece_move) == move:
+                        piece_move = move
+                        move_loop = False
+                except:
+                    print("There was an error with checking the entered piece move.")
+        try:
+            makeMove(piece_call, int(piece_move))
+            print(f"{piece_call.name} moved to {piece_move}.")
+            playerGameNotation(piece_call.name, piece_move) #For appending to the pgn data structure.
+            if piece_call.name == "wpawn1":
+                promoCheck(wpawn1)
+            clearMoves(piece_call)
+        except:
+            print("There was an error making the move.")
+
+        clearAllMoves()
+        
+        if wking not in pieces:
+            print("White-King has been removed from the game!")
+            break
+
+        if bking not in pieces:
+            print("Black-King has been removed from the game!")
+            break
+        
+        print(f"\npgn: {pgn}")
+
         gameTurnComplete()
 
 gameTesting()
