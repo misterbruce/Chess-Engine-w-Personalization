@@ -1,6 +1,5 @@
 from random import randint
 import time
-import copy
 
 gameTurn = "white"
 def gameTurnComplete():
@@ -650,6 +649,348 @@ def kingCheck(self):
         if rookCheck or bishopCheck or knightCheck or pawnCheck:
             return True
 
+        
+
+#Produces moves without canceling for checks.
+#NOTE -> I am concerned about the amount of code this is taking and am wondering if their is a way to reuse
+#the move generation code and just assign it to a variable. Cheers to refactoring, furture me!
+wking_storage = []
+bking_storage = []
+def updateKingStorage():
+    global wking_storage
+    global bking_storage
+    wking_storage = []
+    bking_storage = []
+    for i in hor_rows:
+            for item in i:
+                if item == wking.pos:
+                    intex1 = hor_rows.index(i)
+                    itemtex1 = i.index(item)
+                    #intex values
+                    reset_intex1 = intex1
+                    intex_up1 = (intex1 - intex1) + 1
+                    intex_down1 = intex1
+                    #itemtex values
+                    reset_itemtex1 = itemtex1
+                    itemtex_right1 = (itemtex1 - itemtex1) + 1
+                    itemtex_left1 = (itemtex1 - itemtex1) + 1
+
+        #Vertical Up
+    lopbol = True
+    count = 0
+    while count < intex_up1 and lopbol == True:
+        intex1 += 1
+        try: 
+            wking_storage.append(hor_rows[intex1][itemtex1])
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Vertical Down
+    lopbol = True
+    count = 0
+    intex1 = reset_intex1
+    #if loop to check edgecase
+    while count < intex_down1 and lopbol == True:
+        intex1 -= 1
+        try: 
+            wking_storage.append(hor_rows[intex1][itemtex1])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Horizontal Left
+    count = 0
+    lopbol = True
+    intex1 = reset_intex1
+    while count < itemtex_left1 and lopbol == True:
+        itemtex1 += 1
+        try: 
+            wking_storage.append(hor_rows[intex1][itemtex1])
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Horizontal Right
+    count = 0
+    lopbol = True
+    itemtex1 = reset_itemtex1
+    while count < itemtex_right1 and lopbol == True:
+        itemtex1 -= 1
+        try: 
+            wking_storage.append(hor_rows[intex1][itemtex1])
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    for i in hor_rows:
+        for item in i:
+            if item == wking.pos:
+                intex = hor_rows.index(i)
+                itemtex = i.index(item)
+                #intex values
+                reset_intex = intex
+                intex_down = intex
+                intex_up = 7 - intex
+                #itemtex values
+                reset_itemtex = itemtex
+                itemtex_right = itemtex
+                intex_down2 = intex_down
+
+    #Diagonal Up-Left
+    count = 0
+    lopbol = True
+    while count < intex_up and lopbol == True:
+        itemtex += 1
+        intex += 1
+
+        try:
+            wking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Diagonal Down-Right 
+    count = 0
+    lopbol = True
+    itemtex = reset_itemtex
+    intex  = reset_intex
+    while count < intex_down and lopbol == True:
+        itemtex -= 1
+        intex -= 1
+
+        try:
+            wking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Diagonal Up-Right
+    count = 0
+    lopbol = True
+    intex = reset_intex
+    itemtex = reset_itemtex
+    while count < itemtex_right and lopbol == True:
+        itemtex -= 1
+        intex += 1
+
+        try:
+            wking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Diagonal Down-Left
+    count = 0
+    lopbol = True
+    intex = reset_intex
+    itemtex = reset_itemtex
+    while count < intex_down2 and lopbol == True:
+        itemtex += 1
+        intex -= 1
+
+        try:
+            wking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+#--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    for i in hor_rows:
+            for item in i:
+                if item == bking.pos:
+                    intex1 = hor_rows.index(i)
+                    itemtex1 = i.index(item)
+                    #intex values
+                    reset_intex1 = intex1
+                    intex_up1 = (intex1 - intex1) + 1
+                    intex_down1 = intex1
+                    #itemtex values
+                    reset_itemtex1 = itemtex1
+                    itemtex_right1 = (itemtex1 - itemtex1) + 1
+                    itemtex_left1 = (itemtex1 - itemtex1) + 1
+
+        #Vertical Up
+    lopbol = True
+    count = 0
+    while count < intex_up1 and lopbol == True:
+        intex1 += 1
+        try: 
+            bking_storage.append(hor_rows[intex1][itemtex1])
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Vertical Down
+    lopbol = True
+    count = 0
+    intex1 = reset_intex1
+    #if loop to check edgecase
+    while count < intex_down1 and lopbol == True:
+        intex1 -= 1
+        try: 
+            bking_storage.append(hor_rows[intex1][itemtex1])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Horizontal Left
+    count = 0
+    lopbol = True
+    intex1 = reset_intex1
+    while count < itemtex_left1 and lopbol == True:
+        itemtex1 += 1
+        try: 
+            bking_storage.append(hor_rows[intex1][itemtex1])
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Horizontal Right
+    count = 0
+    lopbol = True
+    itemtex1 = reset_itemtex1
+    while count < itemtex_right1 and lopbol == True:
+        itemtex1 -= 1
+        try: 
+            bking_storage.append(hor_rows[intex1][itemtex1])
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex1][itemtex1] == i.pos:
+                lopbol = False
+        count += 1
+
+    for i in hor_rows:
+        for item in i:
+            if item == bking.pos:
+                intex = hor_rows.index(i)
+                itemtex = i.index(item)
+                #intex values
+                reset_intex = intex
+                intex_down = intex
+                intex_up = 7 - intex
+                #itemtex values
+                reset_itemtex = itemtex
+                itemtex_right = itemtex
+                intex_down2 = intex_down
+
+    #Diagonal Up-Left
+    count = 0
+    lopbol = True
+    while count < intex_up and lopbol == True:
+        itemtex += 1
+        intex += 1
+
+        try:
+            bking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Diagonal Down-Right 
+    count = 0
+    lopbol = True
+    itemtex = reset_itemtex
+    intex  = reset_intex
+    while count < intex_down and lopbol == True:
+        itemtex -= 1
+        intex -= 1
+
+        try:
+            bking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Diagonal Up-Right
+    count = 0
+    lopbol = True
+    intex = reset_intex
+    itemtex = reset_itemtex
+    while count < itemtex_right and lopbol == True:
+        itemtex -= 1
+        intex += 1
+
+        try:
+            bking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
+    #Diagonal Down-Left
+    count = 0
+    lopbol = True
+    intex = reset_intex
+    itemtex = reset_itemtex
+    while count < intex_down2 and lopbol == True:
+        itemtex += 1
+        intex -= 1
+
+        try:
+            bking_storage.append(hor_rows[intex][itemtex])
+            break
+        except:
+            break
+
+        for i in pieces:
+            if hor_rows[intex][itemtex] == i.pos:
+                lopbol = False
+        count += 1
+
 class King():
     #Think of king as a queen but can only make a single move.
     def __init__(self, team, name, pos):
@@ -667,7 +1008,7 @@ class King():
         self.bishop_check = []
         self.pawn_check = []
         
-    #going to reverse all legal moves from this pos to determine if there is an 
+    #Going to reverse all legal moves from this pos to determine if there is an 
     #adaquate piece that would therefore be rendering a check. Also to prevent 
     #moving into check and to determie check/stale mate.
     def checkMoveGeneration(self):
@@ -675,18 +1016,6 @@ class King():
         self.knight_check = []
         self.bishop_check = [] 
         self.pawn_check = []
-
-        if self.team == "white":
-            if self.pos + 9 == BlackPawn:
-                self.pawn_check.append(self.pos + 9)
-            if self.pos + 7 == BlackPawn:
-                self.pawn_check.append(self.pos + 7)
-
-        if self.team == "black":
-            if self.pos - 9 == WhitePawn:
-                self.pawn_check.append(self.pos - 9)
-            if self.pos - 7 == WhitePawn:
-                self.pawn_check.append(self.pos - 7)
 
         #Takes the current pos and determines if any threats.
         #Will also allow for checking valid positions incase they have check.
@@ -1117,12 +1446,22 @@ class King():
                 if hor_rows[intex][itemtex] == i.pos:
                     lopbol = False
             count += 1
-
+    
         for piece in pieces:
             for move in self.moves:
                 if piece.team == self.team:
                     if piece.pos == move:
                         self.moves.remove(move)
+
+        updateKingStorage()
+        if self.team == "white":
+            for move in self.moves:
+                if move in bking_storage:
+                    self.moves.remove(move)
+        if self.team == "black":
+            for move in self.moves:
+                if move in wking_storage:
+                    self.moves.remove(move)
 
 class Queen():
     def __init__(self, team, name, pos):
@@ -1304,10 +1643,10 @@ pieces = []
 
 #Starting pos of all pieces.
 #Rooks
-wrook1 = Rook("white", "wrook1", 1)
-pieces.append(wrook1)
-wrook2 = Rook("white", "wrook2", 7)
-pieces.append(wrook2)
+# wrook1 = Rook("white", "wrook1", 1)
+# pieces.append(wrook1)
+# wrook2 = Rook("white", "wrook2", 7)
+# pieces.append(wrook2)
 
 # brook1 = Rook("black", "brook1", 64)
 # pieces.append(brook1)
@@ -1339,7 +1678,7 @@ pieces.append(wrook2)
 #Kings
 wking = King("white", "wking", 5)
 pieces.append(wking)
-bking = King("black", "bking", 61)
+bking = King("black", "bking", 7)
 pieces.append(bking)
 
 #Queens
@@ -1349,16 +1688,16 @@ pieces.append(bking)
 # pieces.append(bquen)
 
 #Pawns
-wpawn1 = WhitePawn("white", "wpawn1", 49)
-wpawn2 = WhitePawn("white", "wpawn2", 50)
+# wpawn1 = WhitePawn("white", "wpawn1", 49)
+# wpawn2 = WhitePawn("white", "wpawn2", 50)
 # wpawn3 = WhitePawn("white", "wpawn3", 11)
 # wpawn4 = WhitePawn("white", "wpawn4", 12)
 # wpawn5 = WhitePawn("white", "wpawn5", 13)
 # wpawn6 = WhitePawn("white", "wpawn6", 14)
 # wpawn7 = WhitePawn("white", "wpawn7", 15)
 # wpawn8 = WhitePawn("white", "wpawn8", 16)
-pieces.append(wpawn1)
-pieces.append(wpawn2)
+# pieces.append(wpawn1)
+# pieces.append(wpawn2)
 # pieces.append(wpawn3)
 # pieces.append(wpawn4)
 # pieces.append(wpawn5)
@@ -1488,7 +1827,7 @@ def postLegalMakeMove():
         for k in pieces_displaced:
             if i.name == k:
                 i.pos = int(pieces_displaced[k])
-    pieces_displaced = {}   
+    pieces_displaced = {}    
 
 #For own team making compromising moves. 
 #This does not include enemy causing a check on their turn.
@@ -1604,7 +1943,7 @@ def autoTesting():
                     print("White-King has been Checkmated!")
                 else:
                     print("White-King has been Stalemated!")
-                active = False
+                break
             potential_moves = []
         if gameTurn == "black":
             for piece in pieces:
@@ -1617,7 +1956,7 @@ def autoTesting():
                     print("Black-King has been Checkmated!")
                 else:
                     print("Black-King has been Stalemated!")
-                    active = False
+                break
             potential_moves = []
         time.sleep(1)
 
