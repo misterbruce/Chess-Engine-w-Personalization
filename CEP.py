@@ -234,7 +234,7 @@ class Rook():
             self.symbol = "♜"
         self.moves = []
         castleAccess = True #For king to castle to a chosen unmoved rook.
-    
+
     #Adds moves while taking into consideration of current piece pos in "pieces".
     def moveGeneration(self):
         #Indexing the location of piece to allow for movement generation stemming from position on hor_rows 2D array.
@@ -993,7 +993,7 @@ def updateKingStorage():
 
 class King():
     #Think of king as a queen but can only make a single move.
-    def __init__(self, team, name, pos):
+    def __init__(self, team, name, pos, origin):
         self.name = name
         self.pos = pos
         self.team = team
@@ -1003,6 +1003,10 @@ class King():
         elif self.team == "black":
             self.symbol = "♚"
         self.moves = []
+
+        self.castleAccess = True
+        self.origin = origin
+
         self.rook_check = [] #List of all moves that could be made by any would-be attacker.
         self.knight_check = []
         self.bishop_check = []
@@ -1463,6 +1467,61 @@ class King():
                 if move in wking_storage:
                     self.moves.remove(move)
 
+        #White king caslting.
+
+        if self.pos != self.origin:
+            self.castleAccess = False
+
+        wcanCastleLeft = False
+        wcanCastleRight = False
+        tempRight = []
+        tempLeft = []
+        if self.castleAccess:
+            if self.team == "white":
+                for row in hor_rows:
+                    for item in row:
+                        if item == self.pos:
+                            intex = hor_rows.index(row)
+                            itemtex = (row.index(item) + 1)
+                            right_itmetex = range(2, itemtex)
+                            left_itemtex = range(itemtex, 7)
+
+                            for i in right_itmetex:
+                                for piece in pieces:
+                                    if piece.pos == hor_rows[intex][itemtex-1]:
+                                        wcanCastleRight = False
+                                        itemtex -= 1
+                                    else: 
+                                        #list of moves to make and determine if results in check.
+                                        tempRight.append(hor_rows[intex][itemtex])
+                                        itemtex -= 1
+
+                                    for pot_move in tempRight:
+                                        reset = self.pos
+                                        legalMakeMove(wking, pot_move)
+                                        wking.checkMoveGeneration()
+                                        if kingCheck(wking):
+                                            wcanCastleRight = False
+                                            continue
+                                        wking.clearCheckMoves()
+                                        self.pos = reset
+
+
+                            for i in left_itemtex:
+                                for piece in pieces:
+                                    if piece.pos == hor_rows[intex][itemtex]:
+                                        wcanCastleLeft = False
+                                    else:
+                                        wcanCastleLeft = True
+
+        #For white king.
+        if self.team == "white" and self.castleAccess:
+            if wcanCastleRight:
+                self.moves.append(2)
+            if wcanCastleLeft:
+                self.moves.append(7)
+
+
 class Queen():
     def __init__(self, team, name, pos):
         self.name = name
@@ -1676,9 +1735,9 @@ pieces = []
 # pieces.append(bbishop2)
 
 #Kings
-wking = King("white", "wking", 5)
+wking = King("white", "wking", 5, 5)
 pieces.append(wking)
-bking = King("black", "bking", 7)
+bking = King("black", "bking", 50, 50)
 pieces.append(bking)
 
 #Queens
@@ -1747,8 +1806,8 @@ def makeMove(self, pos=int):
         pieces.remove(piece)
 
     if canExecute and posTaken == False:
-        self.pos = pos    
-    
+        self.pos = pos
+        
 def clearMoves(self):
     self.moves = []
 
@@ -2043,10 +2102,10 @@ def gameTesting():
                 wking.checkMoveGeneration()
                 if kingCheck(wking):
                     print("White-King is Checkmated.")
-                    active = False
+                    break
                 else:
                     print("White-King has been Stalemated.")
-                    active = False
+                    break
 
         if gameTurn == "black":
             for piece in pieces:
@@ -2058,10 +2117,10 @@ def gameTesting():
                 bking.checkMoveGeneration()
                 if kingCheck(bking):
                     print("Black-King is Checkmated.")
-                    active = False
+                    break
                 else:
                     print("Black-King has been Stalemated.")
-                    active = False
+                    break
 
         time.sleep(1)
 
